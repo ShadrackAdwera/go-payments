@@ -1,3 +1,9 @@
+CREATE TYPE "payment_types" AS ENUM (
+  'master_card',
+  'visa',
+  'mpesa'
+);
+
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY,
   "username" varchar NOT NULL,
@@ -11,7 +17,7 @@ CREATE TABLE "clients" (
   "email" varchar UNIQUE NOT NULL,
   "phone" varchar UNIQUE NOT NULL,
   "account_number" varchar,
-  "preferred_payment_type" varchar UNIQUE NOT NULL
+  "preferred_payment_type" payment_types NOT NULL
 );
 
 CREATE TABLE "requests" (
