@@ -19,7 +19,7 @@ OFFSET $2;
 -- name: UpdateUserRole :one
 UPDATE users 
 SET role = $2
-WHERE id = sqlc.arg(id)
+WHERE id = $1
 RETURNING *;
 
 -- name: DeleteUser :exec
