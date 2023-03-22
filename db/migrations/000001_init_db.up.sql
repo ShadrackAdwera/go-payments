@@ -40,8 +40,8 @@ CREATE TABLE "requests" (
 
 CREATE TABLE "user_payments" (
   "id" bigserial PRIMARY KEY,
-  "request_id" bigint,
-  "client_id" bigint,
+  "request_id" bigint NOT NULL,
+  "client_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -49,7 +49,7 @@ CREATE UNIQUE INDEX ON "requests" ("createdby_id", "approvedby_id");
 
 CREATE UNIQUE INDEX ON "user_payments" ("client_id", "request_id");
 
-COMMENT ON COLUMN "requests"."status" IS 'Payment Status can be PENDING or RESOLVED';
+COMMENT ON COLUMN "requests"."status" IS 'Payment Status can be PENDING, APPROVED or REJECTED';
 
 ALTER TABLE "requests" ADD FOREIGN KEY ("paid_to_id") REFERENCES "clients" ("id");
 
