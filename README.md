@@ -10,7 +10,7 @@ Make payments to users via bank deposits (VISA, Mastercard) or Mobile Money
 - After approval, the payment is made to the users based on their preferred mode of payment.  
 
 ## Technologies
-- OAuth0
+- Auth0
 - Gin
 - Redis
 - Postgres
