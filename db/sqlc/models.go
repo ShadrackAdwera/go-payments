@@ -99,6 +99,49 @@ func (ns NullPaymentTypes) Value() (driver.Value, error) {
 	return string(ns.PaymentTypes), nil
 }
 
+type UserRoles string
+
+const (
+	UserRolesPaymentInitiator UserRoles = "payment_initiator"
+	UserRolesPaymentApprover  UserRoles = "payment_approver"
+	UserRolesAdmin            UserRoles = "admin"
+)
+
+func (e *UserRoles) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRoles(s)
+	case string:
+		*e = UserRoles(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRoles: %T", src)
+	}
+	return nil
+}
+
+type NullUserRoles struct {
+	UserRoles UserRoles
+	Valid     bool // Valid is true if UserRoles is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRoles) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRoles, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRoles.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRoles) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRoles), nil
+}
+
 type Client struct {
 	ID                   int64          `json:"id"`
 	Name                 string         `json:"name"`
@@ -122,10 +165,11 @@ type Request struct {
 }
 
 type User struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     string    `json:"role"`
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Role      UserRoles `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type UserPayment struct {
