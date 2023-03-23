@@ -10,11 +10,18 @@ CREATE TYPE "approval_status" AS ENUM (
   'rejected'
 );
 
+CREATE TYPE "user_roles" AS ENUM (
+  'payment_initiator',
+  'payment_approver',
+  'admin'
+);
+
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY,
   "username" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
-  "role" varchar UNIQUE NOT NULL
+  "role" user_roles NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "clients" (
