@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUserPayment = `-- name: CreateUserPayment :one
@@ -19,8 +20,8 @@ RETURNING id, request_id, client_id, created_at
 `
 
 type CreateUserPaymentParams struct {
-	RequestID int64 `json:"request_id"`
-	ClientID  int64 `json:"client_id"`
+	RequestID sql.NullInt64 `json:"request_id"`
+	ClientID  sql.NullInt64 `json:"client_id"`
 }
 
 func (q *Queries) CreateUserPayment(ctx context.Context, arg CreateUserPaymentParams) (UserPayment, error) {
@@ -111,8 +112,8 @@ RETURNING id, request_id, client_id, created_at
 `
 
 type UpdateUserPaymentParams struct {
-	ID       int64 `json:"id"`
-	ClientID int64 `json:"client_id"`
+	ID       int64         `json:"id"`
+	ClientID sql.NullInt64 `json:"client_id"`
 }
 
 func (q *Queries) UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error) {

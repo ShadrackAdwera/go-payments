@@ -7,41 +7,27 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-  id, username, email, role
+  id, username
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2
 )
-RETURNING id, username, email, role, created_at
+RETURNING id, username
 `
 
 type CreateUserParams struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     UserRoles `json:"role"`
+	ID       string `json:"id"`
+	Username string `json:"username"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
-		arg.ID,
-		arg.Username,
-		arg.Email,
-		arg.Role,
-	)
+	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Username)
 	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Username)
 	return i, err
 }
 
@@ -51,31 +37,25 @@ FROM users
 WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deleteUser, id)
 	return err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, email, role, created_at FROM users
+SELECT id, username FROM users
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, id)
 	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Username)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, username, email, role, created_at FROM users 
+SELECT id, username FROM users 
 ORDER BY username
 LIMIT $1
 OFFSET $2
@@ -95,13 +75,7 @@ func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, err
 	var items []User
 	for rows.Next() {
 		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Username,
-			&i.Email,
-			&i.Role,
-			&i.CreatedAt,
-		); err != nil {
+		if err := rows.Scan(&i.ID, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -115,27 +89,21 @@ func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, err
 	return items, nil
 }
 
-const updateUserRole = `-- name: UpdateUserRole :one
+const updateUser = `-- name: UpdateUser :one
 UPDATE users 
-SET role = $2
+SET username = COALESCE($2,username)
 WHERE id = $1
-RETURNING id, username, email, role, created_at
+RETURNING id, username
 `
 
-type UpdateUserRoleParams struct {
-	ID   uuid.UUID `json:"id"`
-	Role UserRoles `json:"role"`
+type UpdateUserParams struct {
+	ID       string         `json:"id"`
+	Username sql.NullString `json:"username"`
 }
 
-func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUserRole, arg.ID, arg.Role)
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser, arg.ID, arg.Username)
 	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Email,
-		&i.Role,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Username)
 	return i, err
 }
