@@ -1,8 +1,8 @@
 -- name: CreatePermission :one
 INSERT INTO permissions (
-  name, description, role_id
+  name, description, role_id, createdby_id
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING *;
 
