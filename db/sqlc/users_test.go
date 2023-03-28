@@ -75,7 +75,7 @@ func TestUpdateUser(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedUser)
-	require.Equal(t, user.Username, updatedUser.Username)
+	require.Equal(t, newUsername, updatedUser.Username)
 }
 
 func TestDeleteUser(t *testing.T) {
