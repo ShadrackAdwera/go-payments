@@ -1,8 +1,8 @@
 -- name: CreateUserRole :one
 INSERT INTO users_roles (
-  user_id, role_id
+  user_id, role_id, createdby_id
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
 RETURNING *;
 
