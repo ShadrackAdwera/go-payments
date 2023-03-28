@@ -1,6 +1,6 @@
 -- name: CreateRole :one
 INSERT INTO roles (
-  id, name
+  name, createdby_id
 ) VALUES (
   $1, $2
 )
