@@ -36,7 +36,7 @@ func CreateRandomClient(t *testing.T) Client {
 	require.Equal(t, newClient.Name, name)
 	require.Equal(t, newClient.Email, email)
 	require.Equal(t, newClient.Phone, phone)
-	require.Equal(t, newClient.AccountNumber, accNo)
+	require.Equal(t, newClient.AccountNumber.String, accNo)
 	require.Equal(t, newClient.PreferredPaymentType, pType)
 	return newClient
 }
