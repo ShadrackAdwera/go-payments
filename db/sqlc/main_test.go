@@ -9,18 +9,19 @@ import (
 )
 
 var testDb *sql.DB
-var testQuery Querier
+var testQuery TxStore
 
-const dbUrl = "postgresql://root:password@localhost:5431/go_payments_test?sslmode=disable"
-
+// load db variables through .env file
 func TestMain(m *testing.M) {
 	var err error
-	testDb, err = sql.Open("postgres", dbUrl)
+
+	testDb, err = sql.Open("postgres", "postgresql://root:password@localhost:5431/go_payments_test?sslmode=disable")
 
 	if err != nil {
 		panic(err)
 	}
 
 	testQuery = NewStore(testDb)
+
 	os.Exit(m.Run())
 }

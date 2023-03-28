@@ -1,8 +1,8 @@
 -- name: CreateUser :one
 INSERT INTO users (
-  id, username, email, role
+  id, username
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2
 )
 RETURNING *;
 
@@ -16,9 +16,9 @@ ORDER BY username
 LIMIT $1
 OFFSET $2;
 
--- name: UpdateUserRole :one
+-- name: UpdateUser :one
 UPDATE users 
-SET role = $2
+SET username = COALESCE(sqlc.narg(username),username)
 WHERE id = $1
 RETURNING *;
 

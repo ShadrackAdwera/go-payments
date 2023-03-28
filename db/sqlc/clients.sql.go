@@ -12,11 +12,11 @@ import (
 
 const createClient = `-- name: CreateClient :one
 INSERT INTO clients (
-  name, email, phone, account_number, preferred_payment_type
+  name, email, phone, account_number, preferred_payment_type, createdby_id
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
-RETURNING id, name, email, phone, account_number, preferred_payment_type
+RETURNING id, name, email, phone, account_number, preferred_payment_type, createdby_id
 `
 
 type CreateClientParams struct {
@@ -25,6 +25,7 @@ type CreateClientParams struct {
 	Phone                string         `json:"phone"`
 	AccountNumber        sql.NullString `json:"account_number"`
 	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	CreatedbyID          string         `json:"createdby_id"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Client, error) {
@@ -34,6 +35,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		arg.Phone,
 		arg.AccountNumber,
 		arg.PreferredPaymentType,
+		arg.CreatedbyID,
 	)
 	var i Client
 	err := row.Scan(
@@ -43,6 +45,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cli
 		&i.Phone,
 		&i.AccountNumber,
 		&i.PreferredPaymentType,
+		&i.CreatedbyID,
 	)
 	return i, err
 }
@@ -59,7 +62,7 @@ func (q *Queries) DeleteClient(ctx context.Context, id int64) error {
 }
 
 const getClient = `-- name: GetClient :one
-SELECT id, name, email, phone, account_number, preferred_payment_type FROM clients
+SELECT id, name, email, phone, account_number, preferred_payment_type, createdby_id FROM clients
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,12 +76,13 @@ func (q *Queries) GetClient(ctx context.Context, id int64) (Client, error) {
 		&i.Phone,
 		&i.AccountNumber,
 		&i.PreferredPaymentType,
+		&i.CreatedbyID,
 	)
 	return i, err
 }
 
 const getClients = `-- name: GetClients :many
-SELECT id, name, email, phone, account_number, preferred_payment_type FROM clients 
+SELECT id, name, email, phone, account_number, preferred_payment_type, createdby_id FROM clients 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -105,6 +109,7 @@ func (q *Queries) GetClients(ctx context.Context, arg GetClientsParams) ([]Clien
 			&i.Phone,
 			&i.AccountNumber,
 			&i.PreferredPaymentType,
+			&i.CreatedbyID,
 		); err != nil {
 			return nil, err
 		}
@@ -128,7 +133,7 @@ SET
   account_number = COALESCE($4,account_number),
   preferred_payment_type = COALESCE($5,preferred_payment_type)
 WHERE id = $6
-RETURNING id, name, email, phone, account_number, preferred_payment_type
+RETURNING id, name, email, phone, account_number, preferred_payment_type, createdby_id
 `
 
 type UpdateClientParams struct {
@@ -157,6 +162,7 @@ func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (Cli
 		&i.Phone,
 		&i.AccountNumber,
 		&i.PreferredPaymentType,
+		&i.CreatedbyID,
 	)
 	return i, err
 }

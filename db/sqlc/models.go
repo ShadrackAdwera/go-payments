@@ -9,8 +9,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type ApprovalStatus string
@@ -99,49 +97,6 @@ func (ns NullPaymentTypes) Value() (driver.Value, error) {
 	return string(ns.PaymentTypes), nil
 }
 
-type UserRoles string
-
-const (
-	UserRolesPaymentInitiator UserRoles = "payment_initiator"
-	UserRolesPaymentApprover  UserRoles = "payment_approver"
-	UserRolesAdmin            UserRoles = "admin"
-)
-
-func (e *UserRoles) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UserRoles(s)
-	case string:
-		*e = UserRoles(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UserRoles: %T", src)
-	}
-	return nil
-}
-
-type NullUserRoles struct {
-	UserRoles UserRoles
-	Valid     bool // Valid is true if UserRoles is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUserRoles) Scan(value interface{}) error {
-	if value == nil {
-		ns.UserRoles, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UserRoles.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUserRoles) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UserRoles), nil
-}
-
 type Client struct {
 	ID                   int64          `json:"id"`
 	Name                 string         `json:"name"`
@@ -149,32 +104,51 @@ type Client struct {
 	Phone                string         `json:"phone"`
 	AccountNumber        sql.NullString `json:"account_number"`
 	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	CreatedbyID          string         `json:"createdby_id"`
+}
+
+type Permission struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }
 
 type Request struct {
 	ID    int64  `json:"id"`
 	Title string `json:"title"`
-	// Payment Status can be PENDING, APPROVED or REJECTED
+	// Payment Status can be PENDING or RESOLVED
 	Status       ApprovalStatus `json:"status"`
 	Amount       int64          `json:"amount"`
 	PaidToID     int64          `json:"paid_to_id"`
-	CreatedbyID  uuid.UUID      `json:"createdby_id"`
-	ApprovedbyID uuid.UUID      `json:"approvedby_id"`
+	CreatedbyID  string         `json:"createdby_id"`
+	ApprovedbyID string         `json:"approvedby_id"`
 	CreatedAt    time.Time      `json:"created_at"`
 	ApprovedAt   time.Time      `json:"approved_at"`
 }
 
+type Role struct {
+	ID          int64          `json:"id"`
+	Name        string         `json:"name"`
+	CreatedbyID sql.NullString `json:"createdby_id"`
+}
+
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Role      UserRoles `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
+	ID       string `json:"id"`
+	Username string `json:"username"`
 }
 
 type UserPayment struct {
-	ID        int64     `json:"id"`
-	RequestID int64     `json:"request_id"`
-	ClientID  int64     `json:"client_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int64         `json:"id"`
+	RequestID sql.NullInt64 `json:"request_id"`
+	ClientID  sql.NullInt64 `json:"client_id"`
+	CreatedAt time.Time     `json:"created_at"`
+}
+
+type UsersRole struct {
+	ID          int64  `json:"id"`
+	UserID      string `json:"user_id"`
+	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }

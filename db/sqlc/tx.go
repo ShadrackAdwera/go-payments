@@ -7,7 +7,7 @@ import (
 
 type TxStore interface {
 	Querier
-	ApprovePaymentRequest(ctx context.Context, txApproveRequest TxApproveRequest) (TxApproveResponse, error)
+	ApproveRequestTx(ctx context.Context, args ApproveRequestTxRequest) (ApproveRequestTxResponse, error)
 }
 
 type Store struct {
@@ -22,8 +22,8 @@ func NewStore(db *sql.DB) TxStore {
 	}
 }
 
-func (s *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{
+func (s *Store) execTx(context context.Context, fn func(*Queries) error) error {
+	tx, err := s.db.BeginTx(context, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
 	})
 

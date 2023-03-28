@@ -8,8 +8,6 @@ package db
 import (
 	"context"
 	"database/sql"
-
-	"github.com/google/uuid"
 )
 
 const createRequest = `-- name: CreateRequest :one
@@ -26,8 +24,8 @@ type CreateRequestParams struct {
 	Status       ApprovalStatus `json:"status"`
 	Amount       int64          `json:"amount"`
 	PaidToID     int64          `json:"paid_to_id"`
-	CreatedbyID  uuid.UUID      `json:"createdby_id"`
-	ApprovedbyID uuid.UUID      `json:"approvedby_id"`
+	CreatedbyID  string         `json:"createdby_id"`
+	ApprovedbyID string         `json:"approvedby_id"`
 }
 
 func (q *Queries) CreateRequest(ctx context.Context, arg CreateRequestParams) (Request, error) {
@@ -150,7 +148,7 @@ type UpdateRequestParams struct {
 	Status       NullApprovalStatus `json:"status"`
 	Amount       sql.NullInt64      `json:"amount"`
 	PaidToID     sql.NullInt64      `json:"paid_to_id"`
-	ApprovedbyID uuid.NullUUID      `json:"approvedby_id"`
+	ApprovedbyID sql.NullString     `json:"approvedby_id"`
 	ApprovedAt   sql.NullTime       `json:"approved_at"`
 	ID           int64              `json:"id"`
 }

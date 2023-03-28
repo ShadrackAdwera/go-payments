@@ -9,8 +9,8 @@ import (
 )
 
 func newServer(store db.TxStore) *Server {
-	server := NewServer(store)
-	return server
+	srv := NewServer(store)
+	return srv
 }
 
 func TestMain(m *testing.M) {

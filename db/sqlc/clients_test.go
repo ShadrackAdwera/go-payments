@@ -4,46 +4,43 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/ShadrackAdwera/go-payments/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func CreateRandomClient() Client {
+func CreateRandomClient(t *testing.T) Client {
 	name := utils.RandomString(8)
 	email := fmt.Sprintf("%s@mail.com", name)
-	return Client{
-		ID:    utils.RandomInteger(1, 1000),
-		Name:  name,
-		Email: email,
-		Phone: strconv.Itoa(int(utils.RandomInteger(1, 10))),
-		AccountNumber: sql.NullString{
-			String: strconv.Itoa(int(utils.RandomInteger(1, 16))),
-			Valid:  true,
-		},
-		PreferredPaymentType: PaymentTypes(utils.RandomPreferredPayment()),
-	}
-}
-
-func TestCreateClient(t *testing.T) {
-	client := CreateRandomClient()
+	user := CreateRandomUser(t)
+	phone := utils.RandomString(8)
+	accNo := utils.RandomString(24)
+	pType := PaymentTypes(utils.RandomPreferredPayment())
 
 	newClient, err := testQuery.CreateClient(context.Background(), CreateClientParams{
-		Name:                 client.Name,
-		Email:                client.Email,
-		Phone:                client.Phone,
-		AccountNumber:        client.AccountNumber,
-		PreferredPaymentType: client.PreferredPaymentType,
+		Name:  name,
+		Email: email,
+		Phone: phone,
+		AccountNumber: sql.NullString{
+			String: accNo,
+			Valid:  true,
+		},
+		PreferredPaymentType: pType,
+		CreatedbyID:          user.ID,
 	})
 
 	require.NoError(t, err)
 	require.NotEmpty(t, newClient)
 	require.NotZero(t, newClient.ID)
-	require.Equal(t, newClient.Name, client.Name)
-	require.Equal(t, newClient.Email, client.Email)
-	require.Equal(t, newClient.Phone, client.Phone)
-	require.Equal(t, newClient.AccountNumber, client.AccountNumber)
-	require.Equal(t, newClient.PreferredPaymentType, client.PreferredPaymentType)
+	require.Equal(t, newClient.Name, name)
+	require.Equal(t, newClient.Email, email)
+	require.Equal(t, newClient.Phone, phone)
+	require.Equal(t, newClient.AccountNumber.String, accNo)
+	require.Equal(t, newClient.PreferredPaymentType, pType)
+	return newClient
+}
+
+func TestCreateClient(t *testing.T) {
+	CreateRandomClient(t)
 }
