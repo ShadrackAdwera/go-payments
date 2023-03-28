@@ -104,6 +104,7 @@ type Client struct {
 	Phone                string         `json:"phone"`
 	AccountNumber        sql.NullString `json:"account_number"`
 	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	CreatedbyID          string         `json:"createdby_id"`
 }
 
 type Permission struct {
@@ -111,6 +112,7 @@ type Permission struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }
 
 type Request struct {
@@ -127,8 +129,9 @@ type Request struct {
 }
 
 type Role struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID          int64          `json:"id"`
+	Name        string         `json:"name"`
+	CreatedbyID sql.NullString `json:"createdby_id"`
 }
 
 type User struct {
@@ -144,7 +147,8 @@ type UserPayment struct {
 }
 
 type UsersRole struct {
-	ID     int64  `json:"id"`
-	UserID string `json:"user_id"`
-	RoleID int64  `json:"role_id"`
+	ID          int64  `json:"id"`
+	UserID      string `json:"user_id"`
+	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }
