@@ -12,22 +12,28 @@ import (
 
 const createUserRole = `-- name: CreateUserRole :one
 INSERT INTO users_roles (
-  user_id, role_id
+  user_id, role_id, createdby_id
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
-RETURNING id, user_id, role_id
+RETURNING id, user_id, role_id, createdby_id
 `
 
 type CreateUserRoleParams struct {
-	UserID string `json:"user_id"`
-	RoleID int64  `json:"role_id"`
+	UserID      string `json:"user_id"`
+	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }
 
 func (q *Queries) CreateUserRole(ctx context.Context, arg CreateUserRoleParams) (UsersRole, error) {
-	row := q.db.QueryRowContext(ctx, createUserRole, arg.UserID, arg.RoleID)
+	row := q.db.QueryRowContext(ctx, createUserRole, arg.UserID, arg.RoleID, arg.CreatedbyID)
 	var i UsersRole
-	err := row.Scan(&i.ID, &i.UserID, &i.RoleID)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RoleID,
+		&i.CreatedbyID,
+	)
 	return i, err
 }
 
@@ -43,19 +49,24 @@ func (q *Queries) DeleteUserRole(ctx context.Context, id int64) error {
 }
 
 const getUserRole = `-- name: GetUserRole :one
-SELECT id, user_id, role_id FROM users_roles
+SELECT id, user_id, role_id, createdby_id FROM users_roles
 WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserRole(ctx context.Context, id int64) (UsersRole, error) {
 	row := q.db.QueryRowContext(ctx, getUserRole, id)
 	var i UsersRole
-	err := row.Scan(&i.ID, &i.UserID, &i.RoleID)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RoleID,
+		&i.CreatedbyID,
+	)
 	return i, err
 }
 
 const getUsersRoles = `-- name: GetUsersRoles :many
-SELECT id, user_id, role_id FROM users_roles 
+SELECT id, user_id, role_id, createdby_id FROM users_roles 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -75,7 +86,12 @@ func (q *Queries) GetUsersRoles(ctx context.Context, arg GetUsersRolesParams) ([
 	var items []UsersRole
 	for rows.Next() {
 		var i UsersRole
-		if err := rows.Scan(&i.ID, &i.UserID, &i.RoleID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RoleID,
+			&i.CreatedbyID,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -94,7 +110,7 @@ UPDATE users_roles
 SET role_id = COALESCE($2,role_id),
 user_id = COALESCE($3,user_id)
 WHERE id = $1
-RETURNING id, user_id, role_id
+RETURNING id, user_id, role_id, createdby_id
 `
 
 type UpdateUserRoleParams struct {
@@ -106,6 +122,11 @@ type UpdateUserRoleParams struct {
 func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) (UsersRole, error) {
 	row := q.db.QueryRowContext(ctx, updateUserRole, arg.ID, arg.RoleID, arg.UserID)
 	var i UsersRole
-	err := row.Scan(&i.ID, &i.UserID, &i.RoleID)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RoleID,
+		&i.CreatedbyID,
+	)
 	return i, err
 }

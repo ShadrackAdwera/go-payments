@@ -12,27 +12,34 @@ import (
 
 const createPermission = `-- name: CreatePermission :one
 INSERT INTO permissions (
-  name, description, role_id
+  name, description, role_id, createdby_id
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
-RETURNING id, name, description, role_id
+RETURNING id, name, description, role_id, createdby_id
 `
 
 type CreatePermissionParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	RoleID      int64  `json:"role_id"`
+	CreatedbyID string `json:"createdby_id"`
 }
 
 func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error) {
-	row := q.db.QueryRowContext(ctx, createPermission, arg.Name, arg.Description, arg.RoleID)
+	row := q.db.QueryRowContext(ctx, createPermission,
+		arg.Name,
+		arg.Description,
+		arg.RoleID,
+		arg.CreatedbyID,
+	)
 	var i Permission
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
 		&i.RoleID,
+		&i.CreatedbyID,
 	)
 	return i, err
 }
@@ -49,7 +56,7 @@ func (q *Queries) DeletePermission(ctx context.Context, id int64) error {
 }
 
 const getPermission = `-- name: GetPermission :one
-SELECT id, name, description, role_id FROM permissions
+SELECT id, name, description, role_id, createdby_id FROM permissions
 WHERE id = $1 LIMIT 1
 `
 
@@ -61,12 +68,13 @@ func (q *Queries) GetPermission(ctx context.Context, id int64) (Permission, erro
 		&i.Name,
 		&i.Description,
 		&i.RoleID,
+		&i.CreatedbyID,
 	)
 	return i, err
 }
 
 const getPermissions = `-- name: GetPermissions :many
-SELECT id, name, description, role_id FROM permissions 
+SELECT id, name, description, role_id, createdby_id FROM permissions 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -91,6 +99,7 @@ func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) 
 			&i.Name,
 			&i.Description,
 			&i.RoleID,
+			&i.CreatedbyID,
 		); err != nil {
 			return nil, err
 		}
@@ -111,7 +120,7 @@ SET name = COALESCE($2,name),
 description = COALESCE($3,description),
 role_id = COALESCE($4,role_id)
 WHERE id = $1
-RETURNING id, name, description, role_id
+RETURNING id, name, description, role_id, createdby_id
 `
 
 type UpdatePermissionParams struct {
@@ -134,6 +143,7 @@ func (q *Queries) UpdatePermission(ctx context.Context, arg UpdatePermissionPara
 		&i.Name,
 		&i.Description,
 		&i.RoleID,
+		&i.CreatedbyID,
 	)
 	return i, err
 }

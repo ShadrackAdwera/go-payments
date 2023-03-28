@@ -12,22 +12,22 @@ import (
 
 const createRole = `-- name: CreateRole :one
 INSERT INTO roles (
-  id, name
+  name, createdby_id
 ) VALUES (
   $1, $2
 )
-RETURNING id, name
+RETURNING id, name, createdby_id
 `
 
 type CreateRoleParams struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	Name        string         `json:"name"`
+	CreatedbyID sql.NullString `json:"createdby_id"`
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
-	row := q.db.QueryRowContext(ctx, createRole, arg.ID, arg.Name)
+	row := q.db.QueryRowContext(ctx, createRole, arg.Name, arg.CreatedbyID)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.CreatedbyID)
 	return i, err
 }
 
@@ -43,19 +43,19 @@ func (q *Queries) DeleteRole(ctx context.Context, id int64) error {
 }
 
 const getRole = `-- name: GetRole :one
-SELECT id, name FROM roles
+SELECT id, name, createdby_id FROM roles
 WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
 	row := q.db.QueryRowContext(ctx, getRole, id)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.CreatedbyID)
 	return i, err
 }
 
 const getRoles = `-- name: GetRoles :many
-SELECT id, name FROM roles 
+SELECT id, name, createdby_id FROM roles 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -75,7 +75,7 @@ func (q *Queries) GetRoles(ctx context.Context, arg GetRolesParams) ([]Role, err
 	var items []Role
 	for rows.Next() {
 		var i Role
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedbyID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -93,7 +93,7 @@ const updateRole = `-- name: UpdateRole :one
 UPDATE roles 
 SET name = COALESCE($2,name)
 WHERE id = $1
-RETURNING id, name
+RETURNING id, name, createdby_id
 `
 
 type UpdateRoleParams struct {
@@ -104,6 +104,6 @@ type UpdateRoleParams struct {
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error) {
 	row := q.db.QueryRowContext(ctx, updateRole, arg.ID, arg.Name)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.CreatedbyID)
 	return i, err
 }
