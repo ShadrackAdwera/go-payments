@@ -10,6 +10,13 @@ RETURNING *;
 SELECT * FROM users_roles
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserRolesByUserIdAndRoleId :one
+SELECT * 
+FROM users_roles
+WHERE user_id = $1 
+AND role_id = $2 
+LIMIT 1;
+
 -- name: GetUsersRoles :many
 SELECT * FROM users_roles 
 ORDER BY id
