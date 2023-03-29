@@ -9,7 +9,7 @@ import (
 )
 
 func newServer(store db.TxStore) *Server {
-	srv := NewServer(store)
+	srv := NewServer(store, nil)
 	return srv
 }
 
