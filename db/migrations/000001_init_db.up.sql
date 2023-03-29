@@ -11,7 +11,7 @@ CREATE TYPE "approval_status" AS ENUM (
 );
 
 CREATE TABLE "users" (
-  "id" varchar PRIMARY KEY,
+  "id" varchar PRIMARY KEY NOT NULL,
   "username" varchar NOT NULL
 );
 
@@ -68,6 +68,8 @@ CREATE TABLE "users_roles" (
 CREATE UNIQUE INDEX ON "requests" ("createdby_id", "approvedby_id");
 
 CREATE UNIQUE INDEX ON "user_payments" ("client_id", "request_id");
+
+CREATE UNIQUE INDEX ON "users_roles" ("user_id", "role_id");
 
 COMMENT ON COLUMN "requests"."status" IS 'Payment Status can be PENDING or RESOLVED';
 
