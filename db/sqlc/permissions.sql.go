@@ -73,6 +73,24 @@ func (q *Queries) GetPermission(ctx context.Context, id int64) (Permission, erro
 	return i, err
 }
 
+const getPermissionByName = `-- name: GetPermissionByName :one
+SELECT id, name, description, role_id, createdby_id FROM permissions
+WHERE name = $1 LIMIT 1
+`
+
+func (q *Queries) GetPermissionByName(ctx context.Context, name string) (Permission, error) {
+	row := q.db.QueryRowContext(ctx, getPermissionByName, name)
+	var i Permission
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.RoleID,
+		&i.CreatedbyID,
+	)
+	return i, err
+}
+
 const getPermissions = `-- name: GetPermissions :many
 SELECT id, name, description, role_id, createdby_id FROM permissions 
 ORDER BY id
@@ -87,6 +105,41 @@ type GetPermissionsParams struct {
 
 func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]Permission, error) {
 	rows, err := q.db.QueryContext(ctx, getPermissions, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Permission
+	for rows.Next() {
+		var i Permission
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.RoleID,
+			&i.CreatedbyID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPermissionsByRole = `-- name: GetPermissionsByRole :many
+SELECT id, name, description, role_id, createdby_id 
+FROM permissions 
+WHERE role_id = $1
+`
+
+func (q *Queries) GetPermissionsByRole(ctx context.Context, roleID int64) ([]Permission, error) {
+	rows, err := q.db.QueryContext(ctx, getPermissionsByRole, roleID)
 	if err != nil {
 		return nil, err
 	}
