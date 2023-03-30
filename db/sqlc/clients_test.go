@@ -44,3 +44,24 @@ func CreateRandomClient(t *testing.T) Client {
 func TestCreateClient(t *testing.T) {
 	CreateRandomClient(t)
 }
+
+func TestGetClient(t *testing.T) {
+	client := CreateRandomClient(t)
+
+	foundClient, err := testQuery.GetClient(context.Background(), client.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, foundClient)
+	require.NotZero(t, foundClient.ID)
+	require.Equal(t, foundClient.Name, client.Name)
+	require.Equal(t, foundClient.Email, client.Email)
+	require.Equal(t, foundClient.Phone, client.Phone)
+	require.Equal(t, foundClient.AccountNumber.String, client.AccountNumber.String)
+	require.Equal(t, foundClient.PreferredPaymentType, client.PreferredPaymentType)
+
+	foundClient, err = testQuery.GetClient(context.Background(), utils.RandomInteger(100, 1000))
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, sql.ErrNoRows)
+	require.Empty(t, foundClient)
+}
