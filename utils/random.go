@@ -37,3 +37,8 @@ func RandomRole() string {
 	status := []string{"payment_initiator", "payment_approver", "admin"}
 	return status[rand.Intn(len(status))]
 }
+
+func RandomStatus() string {
+	status := []string{"pending", "approved", "rejected"}
+	return status[rand.Intn(len(status))]
+}
