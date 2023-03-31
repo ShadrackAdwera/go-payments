@@ -65,6 +65,31 @@ func (q *Queries) GetUserRole(ctx context.Context, id int64) (UsersRole, error) 
 	return i, err
 }
 
+const getUserRolesByUserIdAndRoleId = `-- name: GetUserRolesByUserIdAndRoleId :one
+SELECT id, user_id, role_id, createdby_id 
+FROM users_roles
+WHERE user_id = $1 
+AND role_id = $2 
+LIMIT 1
+`
+
+type GetUserRolesByUserIdAndRoleIdParams struct {
+	UserID string `json:"user_id"`
+	RoleID int64  `json:"role_id"`
+}
+
+func (q *Queries) GetUserRolesByUserIdAndRoleId(ctx context.Context, arg GetUserRolesByUserIdAndRoleIdParams) (UsersRole, error) {
+	row := q.db.QueryRowContext(ctx, getUserRolesByUserIdAndRoleId, arg.UserID, arg.RoleID)
+	var i UsersRole
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RoleID,
+		&i.CreatedbyID,
+	)
+	return i, err
+}
+
 const getUsersRoles = `-- name: GetUsersRoles :many
 SELECT id, user_id, role_id, createdby_id FROM users_roles 
 ORDER BY id

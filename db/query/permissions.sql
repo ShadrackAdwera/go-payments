@@ -10,11 +10,20 @@ RETURNING *;
 SELECT * FROM permissions
 WHERE id = $1 LIMIT 1;
 
+-- name: GetPermissionByName :one
+SELECT * FROM permissions
+WHERE name = $1 LIMIT 1;
+
 -- name: GetPermissions :many
 SELECT * FROM permissions 
 ORDER BY id
 LIMIT $1
 OFFSET $2;
+
+-- name: GetPermissionsByRole :many
+SELECT * 
+FROM permissions 
+WHERE role_id = $1;
 
 -- name: UpdatePermission :one
 UPDATE permissions 
