@@ -2,7 +2,7 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"net/http"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
@@ -19,11 +19,11 @@ type CreateClientArgs struct {
 
 func (s *Server) createClient(ctx *gin.Context) {
 
-	p := getProfileData(ctx)
-	if p.Sub == "" {
-		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
-		return
-	}
+	// p := getProfileData(ctx)
+	// if p.Sub == "" {
+	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+	// 	return
+	// }
 
 	var createClientArgs CreateClientArgs
 
@@ -41,7 +41,7 @@ func (s *Server) createClient(ctx *gin.Context) {
 			Valid:  true,
 		},
 		PreferredPaymentType: db.PaymentTypes(createClientArgs.PreferredPaymentType),
-		CreatedbyID:          p.Sub,
+		CreatedbyID:          "",
 	})
 
 	if err != nil {
@@ -50,4 +50,34 @@ func (s *Server) createClient(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{"client": client})
+}
+
+type GetClientsParams struct {
+	Limit  int32 `json:"count" binding:"required,min=1"`
+	Offset int32 `json:"page" binding:"required,min=1"`
+}
+
+func (s *Server) getClients(ctx *gin.Context) {
+	var getClientsParams GetClientsParams
+
+	if err := ctx.ShouldBindQuery(&getClientsParams); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(errors.New("provide the query params")))
+		return
+	}
+
+	clients, err := s.store.GetClients(ctx, db.GetClientsParams{
+		Limit:  getClientsParams.Limit,
+		Offset: getClientsParams.Offset,
+	})
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errJSON(errors.New("no clients found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": clients})
 }
