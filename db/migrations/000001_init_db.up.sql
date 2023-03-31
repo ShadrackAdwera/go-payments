@@ -46,22 +46,15 @@ CREATE TABLE "user_payments" (
 
 CREATE TABLE "permissions" (
   "id" bigserial PRIMARY KEY,
-  "name" varchar NOT NULL,
+  "name" varchar NOT NULL UNIQUE,
   "description" varchar NOT NULL,
-  "role_id" bigint NOT NULL,
   "createdby_id" varchar NOT NULL
 );
 
-CREATE TABLE "roles" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar NOT NULL,
-  "createdby_id" varchar
-);
-
-CREATE TABLE "users_roles" (
+CREATE TABLE "users_permissions" (
   "id" bigserial PRIMARY KEY,
   "user_id" varchar NOT NULL,
-  "role_id" bigint NOT NULL,
+  "permission_id" bigint NOT NULL,
   "createdby_id" varchar NOT NULL
 );
 
@@ -69,7 +62,7 @@ CREATE UNIQUE INDEX ON "requests" ("createdby_id", "approvedby_id");
 
 CREATE UNIQUE INDEX ON "user_payments" ("client_id", "request_id");
 
-CREATE UNIQUE INDEX ON "users_roles" ("user_id", "role_id");
+CREATE UNIQUE INDEX ON "users_permissions" ("user_id", "permission_id");
 
 COMMENT ON COLUMN "requests"."status" IS 'Payment Status can be PENDING or RESOLVED';
 
@@ -85,14 +78,10 @@ ALTER TABLE "user_payments" ADD FOREIGN KEY ("request_id") REFERENCES "requests"
 
 ALTER TABLE "user_payments" ADD FOREIGN KEY ("client_id") REFERENCES "clients" ("id");
 
-ALTER TABLE "permissions" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
-
 ALTER TABLE "permissions" ADD FOREIGN KEY ("createdby_id") REFERENCES "users" ("id");
 
-ALTER TABLE "roles" ADD FOREIGN KEY ("createdby_id") REFERENCES "users" ("id");
+ALTER TABLE "users_permissions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "users_roles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "users_permissions" ADD FOREIGN KEY ("permission_id") REFERENCES "permissions" ("id");
 
-ALTER TABLE "users_roles" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
-
-ALTER TABLE "users_roles" ADD FOREIGN KEY ("createdby_id") REFERENCES "users" ("id");
+ALTER TABLE "users_permissions" ADD FOREIGN KEY ("createdby_id") REFERENCES "users" ("id");
