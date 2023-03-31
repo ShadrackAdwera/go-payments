@@ -12,33 +12,26 @@ import (
 
 const createPermission = `-- name: CreatePermission :one
 INSERT INTO permissions (
-  name, description, role_id, createdby_id
+  name, description, createdby_id
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
-RETURNING id, name, description, role_id, createdby_id
+RETURNING id, name, description, createdby_id
 `
 
 type CreatePermissionParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	RoleID      int64  `json:"role_id"`
 	CreatedbyID string `json:"createdby_id"`
 }
 
 func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error) {
-	row := q.db.QueryRowContext(ctx, createPermission,
-		arg.Name,
-		arg.Description,
-		arg.RoleID,
-		arg.CreatedbyID,
-	)
+	row := q.db.QueryRowContext(ctx, createPermission, arg.Name, arg.Description, arg.CreatedbyID)
 	var i Permission
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
-		&i.RoleID,
 		&i.CreatedbyID,
 	)
 	return i, err
@@ -56,7 +49,7 @@ func (q *Queries) DeletePermission(ctx context.Context, id int64) error {
 }
 
 const getPermission = `-- name: GetPermission :one
-SELECT id, name, description, role_id, createdby_id FROM permissions
+SELECT id, name, description, createdby_id FROM permissions
 WHERE id = $1 LIMIT 1
 `
 
@@ -67,14 +60,13 @@ func (q *Queries) GetPermission(ctx context.Context, id int64) (Permission, erro
 		&i.ID,
 		&i.Name,
 		&i.Description,
-		&i.RoleID,
 		&i.CreatedbyID,
 	)
 	return i, err
 }
 
 const getPermissionByName = `-- name: GetPermissionByName :one
-SELECT id, name, description, role_id, createdby_id FROM permissions
+SELECT id, name, description, createdby_id FROM permissions
 WHERE name = $1 LIMIT 1
 `
 
@@ -85,14 +77,13 @@ func (q *Queries) GetPermissionByName(ctx context.Context, name string) (Permiss
 		&i.ID,
 		&i.Name,
 		&i.Description,
-		&i.RoleID,
 		&i.CreatedbyID,
 	)
 	return i, err
 }
 
 const getPermissions = `-- name: GetPermissions :many
-SELECT id, name, description, role_id, createdby_id FROM permissions 
+SELECT id, name, description, createdby_id FROM permissions 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -116,42 +107,6 @@ func (q *Queries) GetPermissions(ctx context.Context, arg GetPermissionsParams) 
 			&i.ID,
 			&i.Name,
 			&i.Description,
-			&i.RoleID,
-			&i.CreatedbyID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPermissionsByRole = `-- name: GetPermissionsByRole :many
-SELECT id, name, description, role_id, createdby_id 
-FROM permissions 
-WHERE role_id = $1
-`
-
-func (q *Queries) GetPermissionsByRole(ctx context.Context, roleID int64) ([]Permission, error) {
-	rows, err := q.db.QueryContext(ctx, getPermissionsByRole, roleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Permission
-	for rows.Next() {
-		var i Permission
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.RoleID,
 			&i.CreatedbyID,
 		); err != nil {
 			return nil, err
@@ -170,32 +125,24 @@ func (q *Queries) GetPermissionsByRole(ctx context.Context, roleID int64) ([]Per
 const updatePermission = `-- name: UpdatePermission :one
 UPDATE permissions 
 SET name = COALESCE($2,name),
-description = COALESCE($3,description),
-role_id = COALESCE($4,role_id)
+description = COALESCE($3,description)
 WHERE id = $1
-RETURNING id, name, description, role_id, createdby_id
+RETURNING id, name, description, createdby_id
 `
 
 type UpdatePermissionParams struct {
 	ID          int64          `json:"id"`
 	Name        sql.NullString `json:"name"`
 	Description sql.NullString `json:"description"`
-	RoleID      sql.NullInt64  `json:"role_id"`
 }
 
 func (q *Queries) UpdatePermission(ctx context.Context, arg UpdatePermissionParams) (Permission, error) {
-	row := q.db.QueryRowContext(ctx, updatePermission,
-		arg.ID,
-		arg.Name,
-		arg.Description,
-		arg.RoleID,
-	)
+	row := q.db.QueryRowContext(ctx, updatePermission, arg.ID, arg.Name, arg.Description)
 	var i Permission
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
-		&i.RoleID,
 		&i.CreatedbyID,
 	)
 	return i, err
