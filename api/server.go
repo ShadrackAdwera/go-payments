@@ -36,13 +36,16 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	router.GET("/logout", logout.Handler)
 
 	// authenticated user routes
-	router.GET("/api/users/:id", IsAuthenticated, server.getUserById)
+	// TODO: Add authentication later
 	router.POST("/api/users", IsAuthenticated, server.createUser)
+	router.GET("/api/users/:id", server.getUserById)
 	// router.PATCH("/api/users")
 	// router.DELETE("/api/users/:id")
 
 	// client routes
-	router.POST("/api/clients", IsAuthenticated, server.createClient)
+	// TODO: Add authentication later on
+	router.POST("/api/clients", server.createClient)
+	router.GET("/api/clients", server.getClients)
 
 	server.router = router
 	server.auth = auth
