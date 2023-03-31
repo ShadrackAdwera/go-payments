@@ -74,9 +74,9 @@ func (s *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	_, err = s.store.GetUserRolesByUserIdAndRoleId(ctx, db.GetUserRolesByUserIdAndRoleIdParams{
-		UserID: p.Sub,
-		RoleID: perm.RoleID,
+	_, err = s.store.GetUserPermissionByUserIdAndPermissionId(ctx, db.GetUserPermissionByUserIdAndPermissionIdParams{
+		UserID:       p.Sub,
+		PermissionID: perm.ID,
 	})
 
 	if err != nil {
