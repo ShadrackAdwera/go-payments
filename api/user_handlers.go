@@ -11,13 +11,13 @@ import (
 	"strings"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/ShadrackAdwera/go-payments/utils"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 )
 
 // Username-Password-Authentication
-const p_c = "user:create"
 
 type AuthRequest struct {
 	AccessToken string `json:"access_token"`
@@ -63,28 +63,11 @@ func (s *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
 		return
 	}
-	perm, err := s.store.GetPermissionByName(ctx, p_c)
+
+	_, err := s.IsAuthorized(ctx, p.Sub, utils.UsersCreate)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errJSON(errors.New("this permission was not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errJSON(err))
-		return
-	}
-
-	_, err = s.store.GetUserRolesByUserIdAndRoleId(ctx, db.GetUserRolesByUserIdAndRoleIdParams{
-		UserID: p.Sub,
-		RoleID: perm.RoleID,
-	})
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errJSON(errors.New("you are not authorized to make this request")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		ctx.JSON(http.StatusForbidden, errJSON(err))
 		return
 	}
 

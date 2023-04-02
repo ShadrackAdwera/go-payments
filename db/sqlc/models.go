@@ -111,7 +111,6 @@ type Permission struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	RoleID      int64  `json:"role_id"`
 	CreatedbyID string `json:"createdby_id"`
 }
 
@@ -128,12 +127,6 @@ type Request struct {
 	ApprovedAt   time.Time      `json:"approved_at"`
 }
 
-type Role struct {
-	ID          int64          `json:"id"`
-	Name        string         `json:"name"`
-	CreatedbyID sql.NullString `json:"createdby_id"`
-}
-
 type User struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
@@ -146,9 +139,9 @@ type UserPayment struct {
 	CreatedAt time.Time     `json:"created_at"`
 }
 
-type UsersRole struct {
-	ID          int64  `json:"id"`
-	UserID      string `json:"user_id"`
-	RoleID      int64  `json:"role_id"`
-	CreatedbyID string `json:"createdby_id"`
+type UsersPermission struct {
+	ID           int64  `json:"id"`
+	UserID       string `json:"user_id"`
+	PermissionID int64  `json:"permission_id"`
+	CreatedbyID  string `json:"createdby_id"`
 }

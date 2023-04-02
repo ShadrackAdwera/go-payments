@@ -1,8 +1,8 @@
 -- name: CreatePermission :one
 INSERT INTO permissions (
-  name, description, role_id, createdby_id
+  name, description, createdby_id
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING *;
 
@@ -20,16 +20,10 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
--- name: GetPermissionsByRole :many
-SELECT * 
-FROM permissions 
-WHERE role_id = $1;
-
 -- name: UpdatePermission :one
 UPDATE permissions 
 SET name = COALESCE(sqlc.narg(name),name),
-description = COALESCE(sqlc.narg(description),description),
-role_id = COALESCE(sqlc.narg(role_id),role_id)
+description = COALESCE(sqlc.narg(description),description)
 WHERE id = $1
 RETURNING *;
 
