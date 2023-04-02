@@ -56,7 +56,12 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	// users permission routes
 	// TODO: Add authentication later on
 	router.POST("/api/users_permissions", server.createUserPermission)
-	router.GET("/api/users_permissions/:user_id/:permission_id", server.getByUserIdAndPermId) // to use query?
+	router.GET("/api/users_permissions/:user_id/:permission_id", server.getByUserIdAndPermId) // to use query? Tutajua
+
+	// requests routes
+	// TODO: Add authentication later on
+	router.POST("/api/requests", server.createRequest)
+	router.GET("/api/requests", server.getRequests)
 
 	server.router = router
 	server.auth = auth
