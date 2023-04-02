@@ -54,3 +54,21 @@ func TestGetRequestById(t *testing.T) {
 	require.ErrorIs(t, err, sql.ErrNoRows)
 	require.Empty(t, foundReq)
 }
+
+func TestGetRequests(t *testing.T) {
+	n := 5
+
+	for i := 0; i < n; i++ {
+		CreateRandomRequest(t)
+	}
+
+	requests, err := testQuery.GetRequests(context.Background(), GetRequestsParams{
+		Limit:  int32(n),
+		Offset: 1,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, requests)
+	require.Len(t, requests, n)
+
+}
