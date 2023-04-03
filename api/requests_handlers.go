@@ -70,6 +70,13 @@ type GetRequestsArgs struct {
 }
 
 func (srv *Server) getRequests(ctx *gin.Context) {
+
+	// p := getProfileData(ctx)
+	// if p.Sub == "" {
+	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+	// 	return
+	// }
+
 	// _, err := srv.IsAuthorized(ctx, "", utils.RequestsRead)
 
 	// if err != nil {
@@ -86,7 +93,7 @@ func (srv *Server) getRequests(ctx *gin.Context) {
 
 	requests, err := srv.store.GetRequests(ctx, db.GetRequestsParams{
 		Limit:  getRequestsArgs.PageSize,
-		Offset: getRequestsArgs.PageID,
+		Offset: (getRequestsArgs.PageID - 1) * getRequestsArgs.PageSize,
 	})
 
 	if err != nil {
@@ -98,4 +105,48 @@ func (srv *Server) getRequests(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"requests": requests})
+}
+
+type GetRequestsToApproveArgs struct {
+	Status     string `form:"status" binding:"required"`
+	ApproverID string `form:"approver_id" binding:"required"`
+}
+
+func (srv *Server) getRequestsToApprove(ctx *gin.Context) {
+	// p := getProfileData(ctx)
+	// if p.Sub == "" {
+	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+	// 	return
+	// }
+
+	// _, err := srv.IsAuthorized(ctx, "", utils.RequestsRead)
+
+	// if err != nil {
+	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
+	// 	return
+	// }
+
+	var getRequestsArgs GetRequestsToApproveArgs
+
+	if err := ctx.ShouldBindQuery(&getRequestsArgs); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(err))
+		return
+	}
+
+	requests, err := srv.store.GetRequestsToApprove(ctx, db.GetRequestsToApproveParams{
+		Status:       db.ApprovalStatus(getRequestsArgs.Status),
+		ApprovedbyID: "approver", // p.Sub - fix this
+	})
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errJSON(errors.New("no requests found")))
+			return
+		}
+		ctx.JSON(http.StatusNotFound, errJSON(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"requests": requests})
+
 }
