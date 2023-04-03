@@ -77,7 +77,7 @@ func (srv *Server) getRequests(ctx *gin.Context) {
 	// 	return
 	// }
 
-	// _, err := srv.IsAuthorized(ctx, "", utils.RequestsRead)
+	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
 
 	// if err != nil {
 	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
@@ -119,7 +119,7 @@ func (srv *Server) getRequestsToApprove(ctx *gin.Context) {
 	// 	return
 	// }
 
-	// _, err := srv.IsAuthorized(ctx, "", utils.RequestsRead)
+	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
 
 	// if err != nil {
 	// 	ctx.JSON(http.StatusForbidden, errJSON(err))

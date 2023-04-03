@@ -63,6 +63,7 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	router.POST("/api/requests", server.createRequest)
 	router.GET("/api/requests", server.getRequests)                   // ?page_id=1&page_size=10 ||
 	router.GET("/api/requests/approval", server.getRequestsToApprove) // ?approver_id=1&status="pending"
+	// NEXT - Approve request
 
 	server.router = router
 	server.auth = auth
