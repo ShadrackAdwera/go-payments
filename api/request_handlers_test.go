@@ -32,9 +32,8 @@ func createRequest(approvedById string, status string) db.Request {
 
 func TestCreateRequestEndpoint(t *testing.T) {
 	approvedById := utils.RandomString(9)
-	status := utils.RandomStatus()
 
-	request := createRequest(approvedById, status)
+	request := createRequest(approvedById, "pending")
 
 	testCases := []struct {
 		name       string
