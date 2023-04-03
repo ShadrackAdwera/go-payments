@@ -28,6 +28,7 @@ type Querier interface {
 	GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]Permission, error)
 	GetRequest(ctx context.Context, id int64) (Request, error)
 	GetRequests(ctx context.Context, arg GetRequestsParams) ([]Request, error)
+	GetRequestsToApprove(ctx context.Context, arg GetRequestsToApproveParams) ([]Request, error)
 	GetUser(ctx context.Context, id string) (User, error)
 	GetUserPayment(ctx context.Context, id int64) (UserPayment, error)
 	GetUserPayments(ctx context.Context, arg GetUserPaymentsParams) ([]UserPayment, error)
