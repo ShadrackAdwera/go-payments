@@ -36,8 +36,8 @@ func (srv *Server) createUserPermission(ctx *gin.Context) {
 }
 
 type GetByUserIdAndPermIdArgs struct {
-	UserID       string `uri:"user_id" binding:"required"`
-	PermissionID int64  `uri:"permission_id" binding:"required,min=1"`
+	UserID       string `form:"user_id" binding:"required"`
+	PermissionID int64  `form:"permission_id" binding:"required,min=1"`
 }
 
 func (srv *Server) getByUserIdAndPermId(ctx *gin.Context) {
