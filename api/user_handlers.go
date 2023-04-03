@@ -51,16 +51,15 @@ type CreateUserArgs struct {
 }
 
 func (s *Server) createUser(ctx *gin.Context) {
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
 	var createUserArgs CreateUserArgs
 
 	if err := ctx.ShouldBindJSON(&createUserArgs); err != nil {
 		ctx.JSON(http.StatusBadRequest, errJSON(err))
-		return
-	}
-
-	p := getProfileData(ctx)
-	if p.Sub == "" {
-		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
 		return
 	}
 
