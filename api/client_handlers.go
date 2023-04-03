@@ -67,7 +67,7 @@ func (s *Server) getClients(ctx *gin.Context) {
 
 	clients, err := s.store.GetClients(ctx, db.GetClientsParams{
 		Limit:  getClientsParams.Limit,
-		Offset: getClientsParams.Offset,
+		Offset: (getClientsParams.Offset - 1) * getClientsParams.Limit,
 	})
 
 	if err != nil {

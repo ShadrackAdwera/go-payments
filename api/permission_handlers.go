@@ -83,7 +83,7 @@ func (srv *Server) getPermissions(ctx *gin.Context) {
 
 	permissions, err := srv.store.GetPermissions(ctx, db.GetPermissionsParams{
 		Limit:  getPermissionsArgs.PageSize,
-		Offset: getPermissionsArgs.PageID,
+		Offset: (getPermissionsArgs.PageID - 1) * getPermissionsArgs.PageSize,
 	})
 
 	if err != nil {
