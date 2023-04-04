@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,7 @@ import (
 	mockdb "github.com/ShadrackAdwera/go-payments/db/mocks"
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
 	"github.com/ShadrackAdwera/go-payments/utils"
+	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
@@ -157,6 +159,87 @@ func TestGetRequestsToApproveEndpoint(t *testing.T) {
 			q.Add("status", testCase.query.status)
 			q.Add("approver_id", testCase.query.approverID)
 			req.URL.RawQuery = q.Encode()
+
+			srv.router.ServeHTTP(recorder, req)
+
+			testCase.comparator(t, recorder)
+		})
+	}
+}
+
+func TestApproveRequestEndpoint(t *testing.T) {
+	approvedById := utils.RandomString(9)
+
+	pendingRequest := createRequest(approvedById, "pending")
+	//approvedReq := getTxResponse(pendingRequest)
+
+	testCases := []struct {
+		name       string
+		requestId  int64
+		body       gin.H
+		buildStubs func(store *mockdb.MockTxStore)
+		comparator func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:      "TestApproveRequest",
+			requestId: pendingRequest.ID,
+			body: gin.H{
+				"status": string(db.ApprovalStatusApproved),
+			},
+			buildStubs: func(store *mockdb.MockTxStore) {
+				store.EXPECT().GetRequest(gomock.Any(), gomock.Eq(pendingRequest.ID)).Times(1).Return(pendingRequest, nil)
+				args := db.ApproveRequestTxRequest{
+					ID:             pendingRequest.ID,
+					ApprovalStatus: db.ApprovalStatus("approved"),
+				}
+				store.EXPECT().ApproveRequestTx(gomock.Any(), gomock.Eq(args)).Times(1)
+			},
+			comparator: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name:      "TestRejectRequest",
+			requestId: pendingRequest.ID,
+			body: gin.H{
+				"status": string(db.ApprovalStatusRejected),
+			},
+			buildStubs: func(store *mockdb.MockTxStore) {
+				store.EXPECT().GetRequest(gomock.Any(), gomock.Eq(pendingRequest.ID)).Times(1).Return(pendingRequest, nil)
+				args := db.ApproveRequestTxRequest{
+					ID:             pendingRequest.ID,
+					ApprovalStatus: db.ApprovalStatus("rejected"),
+				}
+				store.EXPECT().ApproveRequestTx(gomock.Any(), gomock.Eq(args)).Times(1)
+			},
+			comparator: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctlr := gomock.NewController(t)
+
+			store := mockdb.NewMockTxStore(ctlr)
+
+			defer ctlr.Finish()
+
+			testCase.buildStubs(store)
+
+			jsonBody, err := json.Marshal(testCase.body)
+
+			require.NoError(t, err)
+
+			url := fmt.Sprintf("/api/requests/%d/approve", testCase.requestId)
+			req, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(jsonBody))
+
+			require.NoError(t, err)
+
+			recorder := httptest.NewRecorder()
+
+			srv := newServer(store)
 
 			srv.router.ServeHTTP(recorder, req)
 
