@@ -130,6 +130,51 @@ func (q *Queries) GetRequests(ctx context.Context, arg GetRequestsParams) ([]Req
 	return items, nil
 }
 
+const getRequestsToApprove = `-- name: GetRequestsToApprove :many
+SELECT id, title, status, amount, paid_to_id, createdby_id, approvedby_id, created_at, approved_at FROM requests 
+WHERE status = $1
+AND approvedby_id = $2
+ORDER BY created_at DESC
+`
+
+type GetRequestsToApproveParams struct {
+	Status       ApprovalStatus `json:"status"`
+	ApprovedbyID string         `json:"approvedby_id"`
+}
+
+func (q *Queries) GetRequestsToApprove(ctx context.Context, arg GetRequestsToApproveParams) ([]Request, error) {
+	rows, err := q.db.QueryContext(ctx, getRequestsToApprove, arg.Status, arg.ApprovedbyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Request
+	for rows.Next() {
+		var i Request
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Status,
+			&i.Amount,
+			&i.PaidToID,
+			&i.CreatedbyID,
+			&i.ApprovedbyID,
+			&i.CreatedAt,
+			&i.ApprovedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateRequest = `-- name: UpdateRequest :one
 UPDATE requests 
 SET

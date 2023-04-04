@@ -17,7 +17,7 @@ func CreateRandomRequest(t *testing.T) Request {
 	req, err := testQuery.CreateRequest(context.Background(), CreateRequestParams{
 		Title:        utils.RandomString(15),
 		Status:       ApprovalStatus(utils.RandomStatus()),
-		Amount:       utils.RandomInteger(1, 5),
+		Amount:       utils.RandomInteger(100, 1000000),
 		PaidToID:     client.ID,
 		CreatedbyID:  initiator.ID,
 		ApprovedbyID: approver.ID,
@@ -70,5 +70,34 @@ func TestGetRequests(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, requests)
 	require.Len(t, requests, n)
+}
 
+func TestGetRequestsForApproval(t *testing.T) {
+	client := CreateRandomClient(t)
+	initiator := CreateRandomUser(t)
+	approver := CreateRandomUser(t)
+
+	req, err := testQuery.CreateRequest(context.Background(), CreateRequestParams{
+		Title:        utils.RandomString(15),
+		Status:       ApprovalStatusPending,
+		Amount:       utils.RandomInteger(100, 1000000),
+		PaidToID:     client.ID,
+		CreatedbyID:  initiator.ID,
+		ApprovedbyID: approver.ID,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, req)
+	require.Equal(t, req.PaidToID, client.ID)
+	require.Equal(t, req.CreatedbyID, initiator.ID)
+	require.Equal(t, approver.ID, req.ApprovedbyID)
+
+	requests, err := testQuery.GetRequestsToApprove(context.Background(), GetRequestsToApproveParams{
+		Status:       ApprovalStatusPending,
+		ApprovedbyID: req.ApprovedbyID,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, requests)
+	require.Len(t, requests, 1)
 }

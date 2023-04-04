@@ -16,6 +16,12 @@ ORDER BY id
 LIMIT $1
 OFFSET $2;
 
+-- name: GetRequestsToApprove :many
+SELECT * FROM requests 
+WHERE status = $1
+AND approvedby_id = $2
+ORDER BY created_at DESC;
+
 -- name: UpdateRequest :one
 UPDATE requests 
 SET
