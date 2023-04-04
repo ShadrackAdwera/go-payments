@@ -48,25 +48,46 @@ func (q *Queries) DeleteUserPayment(ctx context.Context, id int64) error {
 }
 
 const getUserPayment = `-- name: GetUserPayment :one
-SELECT id, request_id, client_id, created_at FROM user_payments
-WHERE id = $1 LIMIT 1
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+FROM user_payments
+JOIN clients ON user_payments.client_id = clients.id
+JOIN requests ON user_payments.request_id = requests.id
+WHERE user_payments.id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserPayment(ctx context.Context, id int64) (UserPayment, error) {
+type GetUserPaymentRow struct {
+	ID                   int64          `json:"id"`
+	ClientID             sql.NullInt64  `json:"client_id"`
+	RequestID            sql.NullInt64  `json:"request_id"`
+	Name                 string         `json:"name"`
+	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	Title                string         `json:"title"`
+	Amount               int64          `json:"amount"`
+	Status               ApprovalStatus `json:"status"`
+}
+
+func (q *Queries) GetUserPayment(ctx context.Context, id int64) (GetUserPaymentRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserPayment, id)
-	var i UserPayment
+	var i GetUserPaymentRow
 	err := row.Scan(
 		&i.ID,
-		&i.RequestID,
 		&i.ClientID,
-		&i.CreatedAt,
+		&i.RequestID,
+		&i.Name,
+		&i.PreferredPaymentType,
+		&i.Title,
+		&i.Amount,
+		&i.Status,
 	)
 	return i, err
 }
 
 const getUserPayments = `-- name: GetUserPayments :many
-SELECT id, request_id, client_id, created_at FROM user_payments 
-ORDER BY id
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+FROM user_payments
+JOIN clients ON user_payments.client_id = clients.id
+JOIN requests ON user_payments.request_id = requests.id
+ORDER BY user_payments.id
 LIMIT $1
 OFFSET $2
 `
@@ -76,20 +97,35 @@ type GetUserPaymentsParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetUserPayments(ctx context.Context, arg GetUserPaymentsParams) ([]UserPayment, error) {
+type GetUserPaymentsRow struct {
+	ID                   int64          `json:"id"`
+	ClientID             sql.NullInt64  `json:"client_id"`
+	RequestID            sql.NullInt64  `json:"request_id"`
+	Name                 string         `json:"name"`
+	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	Title                string         `json:"title"`
+	Amount               int64          `json:"amount"`
+	Status               ApprovalStatus `json:"status"`
+}
+
+func (q *Queries) GetUserPayments(ctx context.Context, arg GetUserPaymentsParams) ([]GetUserPaymentsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getUserPayments, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []UserPayment
+	var items []GetUserPaymentsRow
 	for rows.Next() {
-		var i UserPayment
+		var i GetUserPaymentsRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.RequestID,
 			&i.ClientID,
-			&i.CreatedAt,
+			&i.RequestID,
+			&i.Name,
+			&i.PreferredPaymentType,
+			&i.Title,
+			&i.Amount,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
