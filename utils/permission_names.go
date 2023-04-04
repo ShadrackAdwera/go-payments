@@ -5,4 +5,5 @@ const (
 	PaymentInitiator = "payment:initiator"
 	PaymentApprover  = "payment:approver"
 	RequestsRead     = "requests:read"
+	RequestsApprove  = "requests:approve"
 )

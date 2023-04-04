@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
@@ -143,10 +144,85 @@ func (srv *Server) getRequestsToApprove(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, errJSON(errors.New("no requests found")))
 			return
 		}
-		ctx.JSON(http.StatusNotFound, errJSON(err))
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"requests": requests})
+
+}
+
+type ApproveRequestArgs struct {
+	Status string `json:"status" binding:"required"`
+}
+
+type ApproveRequestUriParams struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
+
+func (srv *Server) approveRequest(ctx *gin.Context) {
+	// p := getProfileData(ctx)
+	// if p.Sub == "" {
+	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+	// 	return
+	// }
+
+	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsApprove)
+
+	// if err != nil {
+	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
+	// 	return
+	// }
+
+	var approveRequestUriParams ApproveRequestUriParams
+
+	if err := ctx.ShouldBindUri(&approveRequestUriParams); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(err))
+		return
+	}
+
+	var approveRequestArgs ApproveRequestArgs
+
+	if err := ctx.ShouldBindJSON(&approveRequestArgs); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(err))
+		return
+	}
+
+	foundReq, err := srv.store.GetRequest(ctx, approveRequestUriParams.ID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errJSON(errors.New("no request found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+
+	if foundReq.Status != db.ApprovalStatusPending {
+		ctx.JSON(http.StatusOK, gin.H{"request": "request has already been reviewed"})
+		return
+	}
+
+	// check if approved by id is same as approver id
+
+	request, err := srv.store.ApproveRequestTx(ctx, db.ApproveRequestTxRequest{
+		ID:             approveRequestUriParams.ID,
+		ApprovalStatus: db.ApprovalStatus(approveRequestArgs.Status),
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+
+	if request.Request.Status == db.ApprovalStatusApproved {
+		// send to a redis queue to make payment
+		// if mpesa - mpesa details
+		// if bank deposit - bank details
+		fmt.Printf("Request with ID %d has been %s\n", request.Request.ID, string(request.Request.Status))
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"request": request})
 
 }

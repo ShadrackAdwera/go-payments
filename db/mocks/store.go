@@ -360,10 +360,10 @@ func (mr *MockTxStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // GetUserPayment mocks base method.
-func (m *MockTxStore) GetUserPayment(arg0 context.Context, arg1 int64) (db.UserPayment, error) {
+func (m *MockTxStore) GetUserPayment(arg0 context.Context, arg1 int64) (db.GetUserPaymentRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserPayment", arg0, arg1)
-	ret0, _ := ret[0].(db.UserPayment)
+	ret0, _ := ret[0].(db.GetUserPaymentRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -375,10 +375,10 @@ func (mr *MockTxStoreMockRecorder) GetUserPayment(arg0, arg1 interface{}) *gomoc
 }
 
 // GetUserPayments mocks base method.
-func (m *MockTxStore) GetUserPayments(arg0 context.Context, arg1 db.GetUserPaymentsParams) ([]db.UserPayment, error) {
+func (m *MockTxStore) GetUserPayments(arg0 context.Context, arg1 db.GetUserPaymentsParams) ([]db.GetUserPaymentsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserPayments", arg0, arg1)
-	ret0, _ := ret[0].([]db.UserPayment)
+	ret0, _ := ret[0].([]db.GetUserPaymentsRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

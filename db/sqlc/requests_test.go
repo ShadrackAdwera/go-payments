@@ -16,7 +16,7 @@ func CreateRandomRequest(t *testing.T) Request {
 
 	req, err := testQuery.CreateRequest(context.Background(), CreateRequestParams{
 		Title:        utils.RandomString(15),
-		Status:       ApprovalStatus(utils.RandomStatus()),
+		Status:       ApprovalStatusPending,
 		Amount:       utils.RandomInteger(100, 1000000),
 		PaidToID:     client.ID,
 		CreatedbyID:  initiator.ID,
@@ -100,4 +100,21 @@ func TestGetRequestsForApproval(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, requests)
 	require.Len(t, requests, 1)
+}
+
+func TestUpdateRequest(t *testing.T) {
+	req := CreateRandomRequest(t)
+
+	reviewedReq, err := testQuery.UpdateRequest(context.Background(), UpdateRequestParams{
+		ID: req.ID,
+		Status: NullApprovalStatus{
+			ApprovalStatus: ApprovalStatusApproved,
+			Valid:          true,
+		},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, req.ID, reviewedReq.ID)
+	require.Equal(t, req.Amount, reviewedReq.Amount)
+	require.NotEqual(t, req.Status, reviewedReq.Status)
 }

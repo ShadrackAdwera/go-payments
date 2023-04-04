@@ -61,8 +61,9 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	// requests routes
 	// TODO: Add authentication later on
 	router.POST("/api/requests", server.createRequest)
-	router.GET("/api/requests", server.getRequests)                   // ?page_id=1&page_size=10 ||
-	router.GET("/api/requests/approval", server.getRequestsToApprove) // ?approver_id=1&status="pending"
+	router.GET("/api/requests", server.getRequests)                   // /api/requests?page_id=1&page_size=10 ||
+	router.GET("/api/requests/approval", server.getRequestsToApprove) // /api/requests/approval?approver_id=1&status="pending"
+	router.PATCH("/api/requests/:id/approve", server.approveRequest)
 	// NEXT - Approve request
 
 	server.router = router
