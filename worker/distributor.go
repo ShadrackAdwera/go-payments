@@ -14,7 +14,7 @@ type PaymentTaskDistributor struct {
 	client *asynq.Client
 }
 
-func NewDistributor(clientOpts *asynq.RedisClientOpt) TaskDistributor {
+func NewTaskDistributor(clientOpts asynq.RedisClientOpt) TaskDistributor {
 	client := asynq.NewClient(clientOpts)
 	return &PaymentTaskDistributor{
 		client,
