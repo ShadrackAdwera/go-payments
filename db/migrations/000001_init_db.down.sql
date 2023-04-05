@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS "user_payments";
+DROP TYPE IF EXISTS "paid_status";
 DROP TABLE IF EXISTS "requests";
 DROP TYPE IF EXISTS "approval_status";
 DROP TABLE IF EXISTS "clients";

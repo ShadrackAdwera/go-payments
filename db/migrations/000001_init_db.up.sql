@@ -10,8 +10,13 @@ CREATE TYPE "approval_status" AS ENUM (
   'rejected'
 );
 
+CREATE TYPE "paid_status" AS ENUM (
+  'not_paid',
+  'paid'
+);
+
 CREATE TABLE "users" (
-  "id" varchar PRIMARY KEY NOT NULL,
+  "id" varchar PRIMARY KEY,
   "username" varchar NOT NULL
 );
 
@@ -41,12 +46,13 @@ CREATE TABLE "user_payments" (
   "id" bigserial PRIMARY KEY,
   "request_id" bigint,
   "client_id" bigint,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "status" paid_status NOT NULL
 );
 
 CREATE TABLE "permissions" (
   "id" bigserial PRIMARY KEY,
-  "name" varchar NOT NULL UNIQUE,
+  "name" varchar NOT NULL,
   "description" varchar NOT NULL,
   "createdby_id" varchar NOT NULL
 );
