@@ -65,6 +65,21 @@ func (mr *MockTxStoreMockRecorder) CreateClient(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateClient", reflect.TypeOf((*MockTxStore)(nil).CreateClient), arg0, arg1)
 }
 
+// CreateDarajaToken mocks base method.
+func (m *MockTxStore) CreateDarajaToken(arg0 context.Context, arg1 db.CreateDarajaTokenParams) (db.DarajaToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDarajaToken", arg0, arg1)
+	ret0, _ := ret[0].(db.DarajaToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDarajaToken indicates an expected call of CreateDarajaToken.
+func (mr *MockTxStoreMockRecorder) CreateDarajaToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDarajaToken", reflect.TypeOf((*MockTxStore)(nil).CreateDarajaToken), arg0, arg1)
+}
+
 // CreatePermission mocks base method.
 func (m *MockTxStore) CreatePermission(arg0 context.Context, arg1 db.CreatePermissionParams) (db.Permission, error) {
 	m.ctrl.T.Helper()
@@ -140,6 +155,21 @@ func (mr *MockTxStoreMockRecorder) CreateUserPermission(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserPermission", reflect.TypeOf((*MockTxStore)(nil).CreateUserPermission), arg0, arg1)
 }
 
+// DarajaTokenTx mocks base method.
+func (m *MockTxStore) DarajaTokenTx(arg0 context.Context) (db.DarajaTxResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DarajaTokenTx", arg0)
+	ret0, _ := ret[0].(db.DarajaTxResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DarajaTokenTx indicates an expected call of DarajaTokenTx.
+func (mr *MockTxStoreMockRecorder) DarajaTokenTx(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DarajaTokenTx", reflect.TypeOf((*MockTxStore)(nil).DarajaTokenTx), arg0)
+}
+
 // DeleteClient mocks base method.
 func (m *MockTxStore) DeleteClient(arg0 context.Context, arg1 int64) error {
 	m.ctrl.T.Helper()
@@ -152,6 +182,20 @@ func (m *MockTxStore) DeleteClient(arg0 context.Context, arg1 int64) error {
 func (mr *MockTxStoreMockRecorder) DeleteClient(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteClient", reflect.TypeOf((*MockTxStore)(nil).DeleteClient), arg0, arg1)
+}
+
+// DeleteDarajaToken mocks base method.
+func (m *MockTxStore) DeleteDarajaToken(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDarajaToken", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteDarajaToken indicates an expected call of DeleteDarajaToken.
+func (mr *MockTxStoreMockRecorder) DeleteDarajaToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDarajaToken", reflect.TypeOf((*MockTxStore)(nil).DeleteDarajaToken), arg0, arg1)
 }
 
 // DeletePermission mocks base method.
@@ -252,6 +296,21 @@ func (m *MockTxStore) GetClients(arg0 context.Context, arg1 db.GetClientsParams)
 func (mr *MockTxStoreMockRecorder) GetClients(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClients", reflect.TypeOf((*MockTxStore)(nil).GetClients), arg0, arg1)
+}
+
+// GetDarajaToken mocks base method.
+func (m *MockTxStore) GetDarajaToken(arg0 context.Context) (db.DarajaToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDarajaToken", arg0)
+	ret0, _ := ret[0].(db.DarajaToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDarajaToken indicates an expected call of GetDarajaToken.
+func (mr *MockTxStoreMockRecorder) GetDarajaToken(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDarajaToken", reflect.TypeOf((*MockTxStore)(nil).GetDarajaToken), arg0)
 }
 
 // GetPermission mocks base method.

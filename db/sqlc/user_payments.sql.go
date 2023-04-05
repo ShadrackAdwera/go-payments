@@ -12,26 +12,28 @@ import (
 
 const createUserPayment = `-- name: CreateUserPayment :one
 INSERT INTO user_payments (
-  request_id, client_id
+  request_id, client_id, status
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
-RETURNING id, request_id, client_id, created_at
+RETURNING id, request_id, client_id, created_at, status
 `
 
 type CreateUserPaymentParams struct {
 	RequestID sql.NullInt64 `json:"request_id"`
 	ClientID  sql.NullInt64 `json:"client_id"`
+	Status    PaidStatus    `json:"status"`
 }
 
 func (q *Queries) CreateUserPayment(ctx context.Context, arg CreateUserPaymentParams) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, createUserPayment, arg.RequestID, arg.ClientID)
+	row := q.db.QueryRowContext(ctx, createUserPayment, arg.RequestID, arg.ClientID, arg.Status)
 	var i UserPayment
 	err := row.Scan(
 		&i.ID,
 		&i.RequestID,
 		&i.ClientID,
 		&i.CreatedAt,
+		&i.Status,
 	)
 	return i, err
 }
@@ -48,7 +50,7 @@ func (q *Queries) DeleteUserPayment(ctx context.Context, id int64) error {
 }
 
 const getUserPayment = `-- name: GetUserPayment :one
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
@@ -59,11 +61,12 @@ type GetUserPaymentRow struct {
 	ID                   int64          `json:"id"`
 	ClientID             sql.NullInt64  `json:"client_id"`
 	RequestID            sql.NullInt64  `json:"request_id"`
+	Status               PaidStatus     `json:"status"`
 	Name                 string         `json:"name"`
 	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
 	Title                string         `json:"title"`
 	Amount               int64          `json:"amount"`
-	Status               ApprovalStatus `json:"status"`
+	Status_2             ApprovalStatus `json:"status_2"`
 }
 
 func (q *Queries) GetUserPayment(ctx context.Context, id int64) (GetUserPaymentRow, error) {
@@ -73,17 +76,18 @@ func (q *Queries) GetUserPayment(ctx context.Context, id int64) (GetUserPaymentR
 		&i.ID,
 		&i.ClientID,
 		&i.RequestID,
+		&i.Status,
 		&i.Name,
 		&i.PreferredPaymentType,
 		&i.Title,
 		&i.Amount,
-		&i.Status,
+		&i.Status_2,
 	)
 	return i, err
 }
 
 const getUserPayments = `-- name: GetUserPayments :many
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
@@ -101,11 +105,12 @@ type GetUserPaymentsRow struct {
 	ID                   int64          `json:"id"`
 	ClientID             sql.NullInt64  `json:"client_id"`
 	RequestID            sql.NullInt64  `json:"request_id"`
+	Status               PaidStatus     `json:"status"`
 	Name                 string         `json:"name"`
 	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
 	Title                string         `json:"title"`
 	Amount               int64          `json:"amount"`
-	Status               ApprovalStatus `json:"status"`
+	Status_2             ApprovalStatus `json:"status_2"`
 }
 
 func (q *Queries) GetUserPayments(ctx context.Context, arg GetUserPaymentsParams) ([]GetUserPaymentsRow, error) {
@@ -121,11 +126,12 @@ func (q *Queries) GetUserPayments(ctx context.Context, arg GetUserPaymentsParams
 			&i.ID,
 			&i.ClientID,
 			&i.RequestID,
+			&i.Status,
 			&i.Name,
 			&i.PreferredPaymentType,
 			&i.Title,
 			&i.Amount,
-			&i.Status,
+			&i.Status_2,
 		); err != nil {
 			return nil, err
 		}
@@ -142,24 +148,25 @@ func (q *Queries) GetUserPayments(ctx context.Context, arg GetUserPaymentsParams
 
 const updateUserPayment = `-- name: UpdateUserPayment :one
 UPDATE user_payments 
-SET client_id = $2
+SET status = $2
 WHERE id = $1
-RETURNING id, request_id, client_id, created_at
+RETURNING id, request_id, client_id, created_at, status
 `
 
 type UpdateUserPaymentParams struct {
-	ID       int64         `json:"id"`
-	ClientID sql.NullInt64 `json:"client_id"`
+	ID     int64      `json:"id"`
+	Status PaidStatus `json:"status"`
 }
 
 func (q *Queries) UpdateUserPayment(ctx context.Context, arg UpdateUserPaymentParams) (UserPayment, error) {
-	row := q.db.QueryRowContext(ctx, updateUserPayment, arg.ID, arg.ClientID)
+	row := q.db.QueryRowContext(ctx, updateUserPayment, arg.ID, arg.Status)
 	var i UserPayment
 	err := row.Scan(
 		&i.ID,
 		&i.RequestID,
 		&i.ClientID,
 		&i.CreatedAt,
+		&i.Status,
 	)
 	return i, err
 }

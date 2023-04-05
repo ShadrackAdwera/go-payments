@@ -1,20 +1,20 @@
 -- name: CreateUserPayment :one
 INSERT INTO user_payments (
-  request_id, client_id
+  request_id, client_id, status
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 )
 RETURNING *;
 
 -- name: GetUserPayment :one
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
 WHERE user_payments.id = $1 LIMIT 1;
 
 -- name: GetUserPayments :many
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
@@ -24,7 +24,7 @@ OFFSET $2;
 
 -- name: UpdateUserPayment :one
 UPDATE user_payments 
-SET client_id = $2
+SET status = $2
 WHERE id = $1
 RETURNING *;
 

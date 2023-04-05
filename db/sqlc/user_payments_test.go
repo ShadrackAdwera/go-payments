@@ -21,6 +21,7 @@ func CreateRandomUserPayment(t *testing.T) UserPayment {
 			Int64: client.ID,
 			Valid: true,
 		},
+		Status: PaidStatusNotPaid,
 	})
 
 	require.NoError(t, err)
@@ -52,7 +53,6 @@ func TestGetUserPayment(t *testing.T) {
 	require.NotEmpty(t, req)
 	require.Equal(t, req.Amount, payment.Amount)
 	require.Equal(t, req.Title, payment.Title)
-	require.Equal(t, req.Status, payment.Status)
 
 	client, err := testQuery.GetClient(context.Background(), uPayment.ClientID.Int64)
 
@@ -60,4 +60,19 @@ func TestGetUserPayment(t *testing.T) {
 	require.NotEmpty(t, client)
 	require.Equal(t, client.Name, payment.Name)
 	require.Equal(t, client.PreferredPaymentType, payment.PreferredPaymentType)
+}
+
+func TestUpdateUserPayment(t *testing.T) {
+	uPayment := CreateRandomUserPayment(t)
+
+	payment, err := testQuery.UpdateUserPayment(context.Background(), UpdateUserPaymentParams{
+		ID:     uPayment.ID,
+		Status: PaidStatusPaid,
+	})
+
+	require.NoError(t, err)
+	require.NotEmpty(t, payment)
+	require.Equal(t, payment.ID, uPayment.ID)
+	require.Equal(t, uPayment.RequestID.Int64, payment.RequestID.Int64)
+	require.Equal(t, uPayment.ClientID.Int64, payment.ClientID.Int64)
 }

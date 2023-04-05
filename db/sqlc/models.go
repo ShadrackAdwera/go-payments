@@ -54,6 +54,48 @@ func (ns NullApprovalStatus) Value() (driver.Value, error) {
 	return string(ns.ApprovalStatus), nil
 }
 
+type PaidStatus string
+
+const (
+	PaidStatusNotPaid PaidStatus = "not_paid"
+	PaidStatusPaid    PaidStatus = "paid"
+)
+
+func (e *PaidStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PaidStatus(s)
+	case string:
+		*e = PaidStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PaidStatus: %T", src)
+	}
+	return nil
+}
+
+type NullPaidStatus struct {
+	PaidStatus PaidStatus
+	Valid      bool // Valid is true if PaidStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPaidStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.PaidStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PaidStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPaidStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PaidStatus), nil
+}
+
 type PaymentTypes string
 
 const (
@@ -107,6 +149,12 @@ type Client struct {
 	CreatedbyID          string         `json:"createdby_id"`
 }
 
+type DarajaToken struct {
+	ID          int64     `json:"id"`
+	AccessToken string    `json:"access_token"`
+	ExpiresAt   time.Time `json:"expires_at"`
+}
+
 type Permission struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -137,6 +185,7 @@ type UserPayment struct {
 	RequestID sql.NullInt64 `json:"request_id"`
 	ClientID  sql.NullInt64 `json:"client_id"`
 	CreatedAt time.Time     `json:"created_at"`
+	Status    PaidStatus    `json:"status"`
 }
 
 type UsersPermission struct {

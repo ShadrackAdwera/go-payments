@@ -40,6 +40,7 @@ func (s *Store) ApproveRequestTx(ctx context.Context, args ApproveRequestTxReque
 				Int64: req.PaidToID,
 				Valid: true,
 			},
+			Status: PaidStatusNotPaid,
 		})
 
 		if err != nil {
