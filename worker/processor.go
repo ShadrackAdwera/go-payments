@@ -8,7 +8,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type TaskProcessor interface{}
+type TaskProcessor interface {
+	TaskProcessPayment(ctx context.Context, task *asynq.Task) error
+}
 
 type PaymentTaskProcessor struct {
 	server *asynq.Server
