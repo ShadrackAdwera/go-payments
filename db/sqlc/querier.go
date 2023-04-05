@@ -10,12 +10,14 @@ import (
 
 type Querier interface {
 	CreateClient(ctx context.Context, arg CreateClientParams) (Client, error)
+	CreateDarajaToken(ctx context.Context, arg CreateDarajaTokenParams) (DarajaToken, error)
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
 	CreateRequest(ctx context.Context, arg CreateRequestParams) (Request, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserPayment(ctx context.Context, arg CreateUserPaymentParams) (UserPayment, error)
 	CreateUserPermission(ctx context.Context, arg CreateUserPermissionParams) (UsersPermission, error)
 	DeleteClient(ctx context.Context, id int64) error
+	DeleteDarajaToken(ctx context.Context, id int64) error
 	DeletePermission(ctx context.Context, id int64) error
 	DeleteRequest(ctx context.Context, id int64) error
 	DeleteUser(ctx context.Context, id string) error
@@ -23,6 +25,7 @@ type Querier interface {
 	DeleteUserPermission(ctx context.Context, id int64) error
 	GetClient(ctx context.Context, id int64) (Client, error)
 	GetClients(ctx context.Context, arg GetClientsParams) ([]Client, error)
+	GetDarajaToken(ctx context.Context) (DarajaToken, error)
 	GetPermission(ctx context.Context, id int64) (Permission, error)
 	GetPermissionByName(ctx context.Context, name string) (Permission, error)
 	GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]Permission, error)

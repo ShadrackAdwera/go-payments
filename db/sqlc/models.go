@@ -149,6 +149,12 @@ type Client struct {
 	CreatedbyID          string         `json:"createdby_id"`
 }
 
+type DarajaToken struct {
+	ID          int64     `json:"id"`
+	AccessToken string    `json:"access_token"`
+	ExpiresAt   time.Time `json:"expires_at"`
+}
+
 type Permission struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
