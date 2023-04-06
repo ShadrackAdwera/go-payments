@@ -95,6 +95,20 @@ func (mr *MockTxStoreMockRecorder) CreatePermission(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePermission", reflect.TypeOf((*MockTxStore)(nil).CreatePermission), arg0, arg1)
 }
 
+// CreatePermissions mocks base method.
+func (m *MockTxStore) CreatePermissions(arg0 context.Context, arg1 db.CreatePermissionsParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePermissions", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreatePermissions indicates an expected call of CreatePermissions.
+func (mr *MockTxStoreMockRecorder) CreatePermissions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePermissions", reflect.TypeOf((*MockTxStore)(nil).CreatePermissions), arg0, arg1)
+}
+
 // CreateRequest mocks base method.
 func (m *MockTxStore) CreateRequest(arg0 context.Context, arg1 db.CreateRequestParams) (db.Request, error) {
 	m.ctrl.T.Helper()
@@ -153,6 +167,20 @@ func (m *MockTxStore) CreateUserPermission(arg0 context.Context, arg1 db.CreateU
 func (mr *MockTxStoreMockRecorder) CreateUserPermission(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserPermission", reflect.TypeOf((*MockTxStore)(nil).CreateUserPermission), arg0, arg1)
+}
+
+// CreateUserPermissions mocks base method.
+func (m *MockTxStore) CreateUserPermissions(arg0 context.Context, arg1 db.CreateUserPermissionsParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserPermissions", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserPermissions indicates an expected call of CreateUserPermissions.
+func (mr *MockTxStoreMockRecorder) CreateUserPermissions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserPermissions", reflect.TypeOf((*MockTxStore)(nil).CreateUserPermissions), arg0, arg1)
 }
 
 // DarajaTokenTx mocks base method.
