@@ -64,3 +64,46 @@ func (srv *Server) getByUserIdAndPermId(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"user_permission": userPerm})
 }
+
+type AddPermissionsToUserArgs struct {
+	UserId        string  `json:"user_id" binding:"required"`
+	PermissionIds []int64 `json:"permission_ids" binding:"required"`
+}
+
+func (srv *Server) addPermissionsToUser(ctx *gin.Context) {
+	// p := getProfileData(ctx)
+	// if p.Sub == "" {
+	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+	// 	return
+	// }
+
+	var permToUserArgs AddPermissionsToUserArgs
+
+	if err := ctx.ShouldBindJSON(&permToUserArgs); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(err))
+		return
+	}
+
+	pIds := []int64{}
+	userIds := []string{}
+	uCreatedByIds := []string{}
+
+	for _, uPerm := range permToUserArgs.PermissionIds {
+		pIds = append(pIds, uPerm)
+		userIds = append(userIds, permToUserArgs.UserId)
+		uCreatedByIds = append(uCreatedByIds, "")
+	}
+
+	err := srv.store.CreateUserPermissions(ctx, db.CreateUserPermissionsParams{
+		UserID:       userIds,
+		PermissionID: pIds,
+		CreatedbyID:  uCreatedByIds,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"message": "permissions added to the user"})
+}
