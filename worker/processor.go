@@ -10,14 +10,15 @@ import (
 
 type TaskProcessor interface {
 	TaskProcessPayment(ctx context.Context, task *asynq.Task) error
+	Start() error
 }
 
 type PaymentTaskProcessor struct {
 	server *asynq.Server
-	store  db.Store
+	store  db.TxStore
 }
 
-func NewTaskServer(opts asynq.RedisClientOpt, store db.Store) TaskProcessor {
+func NewTaskServer(opts asynq.RedisClientOpt, store db.TxStore) TaskProcessor {
 	server := asynq.NewServer(opts, asynq.Config{
 		ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
 			log.Err(err).Str("task_type", task.Type()).Bytes("payload", task.Payload()).Msg("error processing task . . ")
