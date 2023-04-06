@@ -2,6 +2,7 @@ package callback
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/ShadrackAdwera/go-payments/authenticator"
 	"github.com/gin-contrib/sessions"
@@ -11,6 +12,9 @@ import (
 // Handler for our callback.
 func Handler(auth *authenticator.Authenticator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
+		frontEndDomain := os.Getenv("FRONTEND_DOMAIN")
+
 		session := sessions.Default(ctx)
 		if ctx.Query("state") != session.Get("state") {
 			ctx.String(http.StatusBadRequest, "Invalid state parameter.")
@@ -43,6 +47,6 @@ func Handler(auth *authenticator.Authenticator) gin.HandlerFunc {
 		}
 
 		// Redirect to protected route.
-		ctx.Redirect(http.StatusTemporaryRedirect, "/")
+		ctx.Redirect(http.StatusMovedPermanently, "http://"+frontEndDomain+"/dashboard")
 	}
 }
