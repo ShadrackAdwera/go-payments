@@ -27,3 +27,11 @@ func NewTaskServer(opts asynq.RedisClientOpt, store db.Store) TaskProcessor {
 		server, store,
 	}
 }
+
+func (processor *PaymentTaskProcessor) Start() error {
+	mux := asynq.NewServeMux()
+
+	mux.HandleFunc(TaskMakePayment, processor.TaskProcessPayment)
+
+	return processor.server.Start(mux)
+}
