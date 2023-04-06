@@ -10,6 +10,11 @@ RETURNING *;
 SELECT * FROM users_permissions
 WHERE id = $1 LIMIT 1;
 
+-- name: CreateUserPermissions :exec
+INSERT INTO users_permissions 
+(user_id, permission_id, createdby_id) 
+VALUES (UNNEST(@user_id::varchar[]), UNNEST(@permission_id::BIGINT[]),UNNEST(@createdby_id::varchar[]));
+
 -- name: GetUserPermissionByUserIdAndPermissionId :one
 SELECT * 
 FROM users_permissions
