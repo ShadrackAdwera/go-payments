@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/ShadrackAdwera/go-payments/worker"
 	"github.com/gin-gonic/gin"
 )
 
@@ -218,6 +219,17 @@ func (srv *Server) approveRequest(ctx *gin.Context) {
 
 	if request.Request.Status == db.ApprovalStatusApproved {
 		// send to a redis queue to make payment
+		err = srv.distro.DistributePayment(ctx, &worker.PaymentPayload{
+			ClientID:      request.Request.PaidToID,
+			Amount:        request.Request.Amount,
+			UserPaymentID: request.UserPayment.ID,
+		})
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errJSON(err))
+			fmt.Println("error distributing the task : %w", err)
+			return
+		}
 		// if mpesa - mpesa details
 		// if bank deposit - bank details
 		fmt.Printf("Request with ID %d has been %s\n", request.Request.ID, string(request.Request.Status))
