@@ -3,9 +3,11 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/ShadrackAdwera/go-payments/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,12 +20,18 @@ type CreateClientArgs struct {
 }
 
 func (s *Server) createClient(ctx *gin.Context) {
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
 
-	// p := getProfileData(ctx)
-	// if p.Sub == "" {
-	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
-	// 	return
-	// }
+	_, err := s.IsAuthorized(ctx, p.Sub, utils.ClientsCreate)
+
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
 
 	var createClientArgs CreateClientArgs
 
@@ -41,7 +49,7 @@ func (s *Server) createClient(ctx *gin.Context) {
 			Valid:  true,
 		},
 		PreferredPaymentType: db.PaymentTypes(createClientArgs.PreferredPaymentType),
-		CreatedbyID:          "",
+		CreatedbyID:          p.Sub,
 	})
 
 	if err != nil {
@@ -53,8 +61,8 @@ func (s *Server) createClient(ctx *gin.Context) {
 }
 
 type GetClientsParams struct {
-	Limit  int32 `json:"count" binding:"required,min=1"`
-	Offset int32 `json:"page" binding:"required,min=1"`
+	Limit  int32 `form:"count" binding:"required,min=1"`
+	Offset int32 `form:"page" binding:"required,min=1"`
 }
 
 func (s *Server) getClients(ctx *gin.Context) {
