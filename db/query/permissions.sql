@@ -6,6 +6,11 @@ INSERT INTO permissions (
 )
 RETURNING *;
 
+-- name: CreatePermissions :exec
+INSERT INTO permissions 
+(name, description, createdby_id) 
+VALUES (UNNEST(@name::varchar[]), UNNEST(@description::varchar[]),UNNEST(@createdby_id::varchar[]));
+
 -- name: GetPermission :one
 SELECT * FROM permissions
 WHERE id = $1 LIMIT 1;
