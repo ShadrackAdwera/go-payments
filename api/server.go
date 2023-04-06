@@ -2,12 +2,14 @@ package api
 
 import (
 	"encoding/gob"
+	"time"
 
 	"github.com/ShadrackAdwera/go-payments/api/callback"
 	"github.com/ShadrackAdwera/go-payments/api/login"
 	"github.com/ShadrackAdwera/go-payments/api/logout"
 	"github.com/ShadrackAdwera/go-payments/authenticator"
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,17 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	cookieStore := cookie.NewStore([]byte("secret"))
 
 	router.Use(sessions.Sessions("auth-session", cookieStore))
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PATCH"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "http://localhost:3000"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 
 	router.GET("/", server.home)
 	router.GET("/login", login.Handler(auth))
@@ -52,6 +65,7 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
 	router.GET("/api/permissions", server.getPermissions)
 	router.GET("/api/permissions/:id", server.getPermissionById)
 	router.POST("/api/permissions", server.createPermission)
+	router.POST("/api/user-permissions", server.addPermissionsToUser)
 
 	// users permission routes
 	// TODO: Add authentication later on
