@@ -9,6 +9,7 @@ import (
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
 	"github.com/ShadrackAdwera/go-payments/worker"
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 )
 
 type NewRequestArgs struct {
@@ -161,6 +162,13 @@ type ApproveRequestUriParams struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
+/*
+1. Request is approved
+2. New record created - request_id, client_id, status : 'not paid'
+3. Payment request sent to task queue for processing - task queue processes payment
+4. Task queue updates the status from NOT PAID to PAID
+*/
+
 func (srv *Server) approveRequest(ctx *gin.Context) {
 	// p := getProfileData(ctx)
 	// if p.Sub == "" {
@@ -206,33 +214,37 @@ func (srv *Server) approveRequest(ctx *gin.Context) {
 	}
 
 	// check if approved by id is same as approver id
-
-	request, err := srv.store.ApproveRequestTx(ctx, db.ApproveRequestTxRequest{
+	approveTxReqParams := db.ApproveRequestTxRequest{
 		ID:             approveRequestUriParams.ID,
 		ApprovalStatus: db.ApprovalStatus(approveRequestArgs.Status),
-	})
+		AfterApproval: func(clientId int64, amount int64, userPaymentId int64, status db.ApprovalStatus) error {
+			if status == db.ApprovalStatusApproved {
+				opts := []asynq.Option{
+					asynq.MaxRetry(10),
+					asynq.ProcessIn(10),
+					asynq.Queue(worker.QueueCritical),
+				}
+
+				fmt.Printf("Request with ID %d has been %s\n", approveRequestUriParams.ID, string(status))
+
+				return srv.distro.DistributePayment(ctx, &worker.PaymentPayload{
+					ClientID:      clientId,
+					Amount:        amount,
+					UserPaymentID: userPaymentId,
+				}, opts...)
+			}
+			return nil
+			// if mpesa - mpesa details
+			// if bank deposit - bank details
+		},
+	}
+
+	//approve and send to redis in a single transaction
+	request, err := srv.store.ApproveRequestTx(ctx, approveTxReqParams)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errJSON(err))
 		return
-	}
-
-	if request.Request.Status == db.ApprovalStatusApproved {
-		// send to a redis queue to make payment
-		err = srv.distro.DistributePayment(ctx, &worker.PaymentPayload{
-			ClientID:      request.Request.PaidToID,
-			Amount:        request.Request.Amount,
-			UserPaymentID: request.UserPayment.ID,
-		})
-
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, errJSON(err))
-			fmt.Println("error distributing the task : %w", err)
-			return
-		}
-		// if mpesa - mpesa details
-		// if bank deposit - bank details
-		fmt.Printf("Request with ID %d has been %s\n", request.Request.ID, string(request.Request.Status))
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"request": request})
