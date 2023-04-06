@@ -16,7 +16,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// vocek57061@oniecan.com
+// vocek57061@oniecan.com //254708374149
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Failed to load the env vars: %v", err)

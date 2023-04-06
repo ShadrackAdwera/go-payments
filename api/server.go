@@ -37,7 +37,7 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PATCH"},
-		AllowHeaders:     []string{"Origin"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
@@ -60,12 +60,12 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 
 	// client routes
 	// TODO: Add authentication later on
-	router.POST("/api/clients", server.createClient)
-	router.GET("/api/clients", server.getClients)
+	router.POST("/api/clients", IsAuthenticated, server.createClient)
+	router.GET("/api/clients", IsAuthenticated, server.getClients)
 
 	//permission routes
 	// TODO: Add authentication later on
-	router.GET("/api/permissions", server.getPermissions)
+	router.GET("/api/permissions", IsAuthenticated, server.getPermissions)
 	router.GET("/api/permissions/:id", server.getPermissionById)
 	router.POST("/api/permissions", server.createPermission)
 	router.POST("/api/user-permissions", server.addPermissionsToUser)
