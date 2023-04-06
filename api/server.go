@@ -54,7 +54,8 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	// authenticated user routes
 	// TODO: Add authentication later
 	router.POST("/api/users", IsAuthenticated, server.createUser)
-	router.GET("/api/users/:id", server.getUserById)
+	router.GET("/api/users/:id", IsAuthenticated, server.getUserById)
+	router.GET("/api/users", IsAuthenticated, server.getUsers)
 	// router.PATCH("/api/users")
 	// router.DELETE("/api/users/:id")
 
@@ -66,9 +67,9 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	//permission routes
 	// TODO: Add authentication later on
 	router.GET("/api/permissions", IsAuthenticated, server.getPermissions)
-	router.GET("/api/permissions/:id", server.getPermissionById)
-	router.POST("/api/permissions", server.createPermission)
-	router.POST("/api/user-permissions", server.addPermissionsToUser)
+	router.GET("/api/permissions/:id", IsAuthenticated, server.getPermissionById)
+	router.POST("/api/permissions", IsAuthenticated, server.createPermission)
+	router.POST("/api/user-permissions", IsAuthenticated, server.addPermissionsToUser)
 
 	// users permission routes
 	// TODO: Add authentication later on
@@ -77,10 +78,10 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 
 	// requests routes
 	// TODO: Add authentication later on
-	router.POST("/api/requests", server.createRequest)
-	router.GET("/api/requests", server.getRequests)                   // /api/requests?page_id=1&page_size=10 ||
-	router.GET("/api/requests/approval", server.getRequestsToApprove) // /api/requests/approval?approver_id=1&status="pending"
-	router.PATCH("/api/requests/:id/approve", server.approveRequest)
+	router.POST("/api/requests", IsAuthenticated, server.createRequest)
+	router.GET("/api/requests", IsAuthenticated, server.getRequests)                   // /api/requests?page_id=1&page_size=10 ||
+	router.GET("/api/requests/approval", IsAuthenticated, server.getRequestsToApprove) // /api/requests/approval?approver_id=1&status="pending"
+	router.PATCH("/api/requests/:id/approve", IsAuthenticated, server.approveRequest)
 	// NEXT - Approve request
 
 	server.router = router
