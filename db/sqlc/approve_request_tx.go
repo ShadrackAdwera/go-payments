@@ -8,6 +8,7 @@ import (
 type ApproveRequestTxRequest struct {
 	ID             int64          `json:"id"`
 	ApprovalStatus ApprovalStatus `json:"approval_status"`
+	AfterApproval  func(clientId int64, amount int64, userPaymentId int64, status ApprovalStatus) error
 }
 
 type ApproveRequestTxResponse struct {
@@ -42,6 +43,12 @@ func (s *Store) ApproveRequestTx(ctx context.Context, args ApproveRequestTxReque
 			},
 			Status: PaidStatusNotPaid,
 		})
+
+		if err != nil {
+			return err
+		}
+
+		err = args.AfterApproval(req.PaidToID, req.Amount, p.ID, args.ApprovalStatus)
 
 		if err != nil {
 			return err
