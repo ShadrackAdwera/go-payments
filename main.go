@@ -59,10 +59,10 @@ func startTaskProcessor(opts asynq.RedisClientOpt, store db.TxStore) {
 	err := processor.Start()
 
 	if err != nil {
-		zerolog.Err(err).Str("error", "error starting the redis task processor")
+		zerolog.Fatal().Err(err).Msg("error starting the redis task processor")
 		return
 	}
-	zerolog.Info().Str("start", "redis task processor started")
+	zerolog.Info().Msg("redis task processor started . . . ")
 }
 
 // func seedDbWithPermissionData() {
