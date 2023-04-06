@@ -1,6 +1,7 @@
 package logout
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,6 +12,9 @@ import (
 // Handler for our logout.
 func Handler(ctx *gin.Context) {
 	logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
+
+	frontEndDomain := os.Getenv("FRONTEND_DOMAIN")
+
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -21,12 +25,12 @@ func Handler(ctx *gin.Context) {
 		scheme = "https"
 	}
 
-	returnTo, err := url.Parse(scheme + "://" + ctx.Request.Host)
+	returnTo, err := url.Parse(scheme + "://" + frontEndDomain)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	fmt.Println(ctx.Request.Host)
 	parameters := url.Values{}
 	parameters.Add("returnTo", returnTo.String())
 	parameters.Add("client_id", os.Getenv("AUTH0_CLIENT_ID"))
