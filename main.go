@@ -34,9 +34,14 @@ func main() {
 
 	srv := api.NewServer(store, auth)
 
-	err = srv.StartServer("0.0.0.0:3000")
+	err = srv.StartServer("0.0.0.0:5000")
 
 	if err != nil {
 		panic(err)
 	}
 }
+
+// func seedDbWithPermissionData() {
+// 	permissions := utils.GetPermissionData()
+
+// }
