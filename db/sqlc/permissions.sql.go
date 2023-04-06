@@ -8,6 +8,8 @@ package db
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
 
 const createPermission = `-- name: CreatePermission :one
@@ -35,6 +37,23 @@ func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionPara
 		&i.CreatedbyID,
 	)
 	return i, err
+}
+
+const createPermissions = `-- name: CreatePermissions :exec
+INSERT INTO permissions 
+(name, description, createdby_id) 
+VALUES (UNNEST($1::varchar[]), UNNEST($2::varchar[]),UNNEST($3::varchar[]))
+`
+
+type CreatePermissionsParams struct {
+	Name        []string `json:"name"`
+	Description []string `json:"description"`
+	CreatedbyID []string `json:"createdby_id"`
+}
+
+func (q *Queries) CreatePermissions(ctx context.Context, arg CreatePermissionsParams) error {
+	_, err := q.db.ExecContext(ctx, createPermissions, pq.Array(arg.Name), pq.Array(arg.Description), pq.Array(arg.CreatedbyID))
+	return err
 }
 
 const deletePermission = `-- name: DeletePermission :exec
