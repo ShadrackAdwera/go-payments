@@ -8,6 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	QueueCritical = "critical"
+	QueueDefaullt = "default"
+	QueueLow      = "low"
+)
+
 type TaskProcessor interface {
 	TaskProcessPayment(ctx context.Context, task *asynq.Task) error
 	Start() error
@@ -23,6 +29,11 @@ func NewTaskServer(opts asynq.RedisClientOpt, store db.TxStore) TaskProcessor {
 		ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
 			log.Err(err).Str("task_type", task.Type()).Bytes("payload", task.Payload()).Msg("error processing task . . ")
 		}),
+		Queues: map[string]int{
+			QueueCritical: 6,
+			QueueDefaullt: 3,
+			QueueLow:      1,
+		},
 	})
 	return &PaymentTaskProcessor{
 		server, store,
