@@ -31,12 +31,8 @@ func GetPermissionData() []PermissionData {
 			PermissionDescription: "This permission allows creating permissions in the system",
 		},
 		{
-			PermissionName:        PaymentInitiator,
-			PermissionDescription: "This permission allows initiating payments in the system",
-		},
-		{
-			PermissionName:        PaymentApprover,
-			PermissionDescription: "This permission allows approving payments in the system",
+			PermissionName:        RequestsCreate,
+			PermissionDescription: "This permission creates payment requests",
 		},
 		{
 			PermissionName:        RequestsRead,
