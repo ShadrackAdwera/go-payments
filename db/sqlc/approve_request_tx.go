@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type ApproveRequestTxRequest struct {
@@ -25,6 +26,10 @@ func (s *Store) ApproveRequestTx(ctx context.Context, args ApproveRequestTxReque
 			Status: NullApprovalStatus{
 				ApprovalStatus: args.ApprovalStatus,
 				Valid:          true,
+			},
+			ApprovedAt: sql.NullTime{
+				Time:  time.Now(),
+				Valid: true,
 			},
 		})
 
