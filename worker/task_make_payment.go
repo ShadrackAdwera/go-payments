@@ -78,10 +78,6 @@ func (processor *PaymentTaskProcessor) TaskProcessPayment(ctx context.Context, t
 		return fmt.Errorf("an error occured while makein the payment - 2 %w", err)
 	}
 
-	log.Info().Str("client_name", clientData.Name).Int64("paid_amount", payload.Amount).
-		Str("preferred_payment", string(clientData.PreferredPaymentType)).
-		Msg("Client info found")
-
 	// update user payment to paid
 	up, err := processor.store.UpdateUserPayment(ctx, db.UpdateUserPaymentParams{
 		ID:     payload.UserPaymentID,
