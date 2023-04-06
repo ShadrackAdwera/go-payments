@@ -37,5 +37,5 @@ func (s *Server) home(ctx *gin.Context) {
 
 	fmt.Println(profileData)
 
-	ctx.JSON(http.StatusAccepted, gin.H{"message": fmt.Sprintf("welcome %s", profileData.Nickname)})
+	ctx.JSON(http.StatusAccepted, gin.H{"user": profileData})
 }
