@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/ShadrackAdwera/go-payments/utils"
 	"github.com/ShadrackAdwera/go-payments/worker"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
@@ -20,6 +21,19 @@ type NewRequestArgs struct {
 }
 
 func (srv *Server) createRequest(ctx *gin.Context) {
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
+
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsCreate)
+
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
+
 	var newRequestArgs NewRequestArgs
 
 	if err := ctx.ShouldBindJSON(&newRequestArgs); err != nil {
@@ -27,36 +41,20 @@ func (srv *Server) createRequest(ctx *gin.Context) {
 		return
 	}
 
-	// _, err := srv.IsAuthorized(ctx, "", utils.PaymentInitiator)
+	_, err = srv.IsAuthorized(ctx, newRequestArgs.ApprovedbyID, utils.RequestsApprove)
 
-	// if err != nil {
-	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
-	// 	return
-	// }
-
-	// approver, err := srv.IsAuthorized(ctx, newRequestArgs.ApprovedbyID, utils.PaymentInitiator)
-
-	// if err != nil {
-	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
-	// 	return
-	// }
-
-	// request, err := srv.store.CreateRequest(ctx, db.CreateRequestParams{
-	// 	Title:       newRequestArgs.Title,
-	// 	Status:      db.ApprovalStatusPending,
-	// 	Amount:      newRequestArgs.Amount,
-	// 	PaidToID:    newRequestArgs.PaidToID,
-	// 	CreatedbyID: "",
-	// 	ApprovedbyID: approver.UserID,
-	// })
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(fmt.Errorf("this approver is not authorized to approve requests")))
+		return
+	}
 
 	request, err := srv.store.CreateRequest(ctx, db.CreateRequestParams{
 		Title:        newRequestArgs.Title,
 		Status:       db.ApprovalStatusPending,
 		Amount:       newRequestArgs.Amount,
 		PaidToID:     newRequestArgs.PaidToID,
-		CreatedbyID:  "",
-		ApprovedbyID: "",
+		CreatedbyID:  p.Sub,
+		ApprovedbyID: newRequestArgs.ApprovedbyID,
 	})
 
 	if err != nil {
@@ -74,18 +72,18 @@ type GetRequestsArgs struct {
 
 func (srv *Server) getRequests(ctx *gin.Context) {
 
-	// p := getProfileData(ctx)
-	// if p.Sub == "" {
-	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
-	// 	return
-	// }
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
 
-	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
 
-	// if err != nil {
-	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
-	// 	return
-	// }
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
 
 	var getRequestsArgs GetRequestsArgs
 
@@ -111,23 +109,22 @@ func (srv *Server) getRequests(ctx *gin.Context) {
 }
 
 type GetRequestsToApproveArgs struct {
-	Status     string `form:"status" binding:"required"`
-	ApproverID string `form:"approver_id" binding:"required"`
+	Status string `form:"status" binding:"required"`
 }
 
 func (srv *Server) getRequestsToApprove(ctx *gin.Context) {
-	// p := getProfileData(ctx)
-	// if p.Sub == "" {
-	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
-	// 	return
-	// }
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
 
-	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsRead)
 
-	// if err != nil {
-	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
-	// 	return
-	// }
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
 
 	var getRequestsArgs GetRequestsToApproveArgs
 
@@ -138,7 +135,7 @@ func (srv *Server) getRequestsToApprove(ctx *gin.Context) {
 
 	requests, err := srv.store.GetRequestsToApprove(ctx, db.GetRequestsToApproveParams{
 		Status:       db.ApprovalStatus(getRequestsArgs.Status),
-		ApprovedbyID: "approver", // p.Sub - fix this
+		ApprovedbyID: p.Sub, // p.Sub - fix this
 	})
 
 	if err != nil {
@@ -170,18 +167,18 @@ type ApproveRequestUriParams struct {
 */
 
 func (srv *Server) approveRequest(ctx *gin.Context) {
-	// p := getProfileData(ctx)
-	// if p.Sub == "" {
-	// 	ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
-	// 	return
-	// }
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
 
-	// _, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsApprove)
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.RequestsApprove)
 
-	// if err != nil {
-	// 	ctx.JSON(http.StatusForbidden, errJSON(err))
-	// 	return
-	// }
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
 
 	var approveRequestUriParams ApproveRequestUriParams
 
