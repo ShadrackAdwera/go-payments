@@ -8,8 +8,7 @@ const (
 	ClientsCreate     = "clients:create"
 	PermissionsRead   = "permissions:read"
 	PermissionsCreate = "permissions:create"
-	PaymentInitiator  = "payment:initiator"
-	PaymentApprover   = "payment:approver"
+	RequestsCreate    = "requests:create"
 	RequestsRead      = "requests:read"
 	RequestsApprove   = "requests:approve"
 )
