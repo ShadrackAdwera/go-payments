@@ -9,6 +9,7 @@ import (
 	"github.com/ShadrackAdwera/go-payments/api/logout"
 	"github.com/ShadrackAdwera/go-payments/authenticator"
 	db "github.com/ShadrackAdwera/go-payments/db/sqlc"
+	"github.com/ShadrackAdwera/go-payments/worker"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -19,12 +20,14 @@ type Server struct {
 	router *gin.Engine
 	store  db.TxStore
 	auth   *authenticator.Authenticator
+	distro worker.TaskDistributor
 }
 
-func NewServer(store db.TxStore, auth *authenticator.Authenticator) *Server {
+func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worker.TaskDistributor) *Server {
 	router := gin.Default()
 	server := Server{
-		store: store,
+		store:  store,
+		distro: distro,
 	}
 
 	gob.Register(map[string]interface{}{})
