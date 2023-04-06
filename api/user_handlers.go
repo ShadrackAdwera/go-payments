@@ -183,3 +183,46 @@ func (s *Server) getUserById(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, foundUser)
 }
+
+type GetUsersParams struct {
+	PageSize int32 `form:"page_size" binding:"required,min=1"`
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+}
+
+func (srv *Server) getUsers(ctx *gin.Context) {
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
+
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.ClientsCreate)
+
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
+
+	var getUsersParams GetUsersParams
+
+	if err := ctx.ShouldBindQuery(&getUsersParams); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(errors.New("provide the query params")))
+		return
+	}
+
+	users, err := srv.store.GetUsers(ctx, db.GetUsersParams{
+		Limit:  getUsersParams.PageSize,
+		Offset: (getUsersParams.PageID - 1) * getUsersParams.PageSize,
+	})
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errJSON(errors.New("no users found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": users})
+}
