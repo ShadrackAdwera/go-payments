@@ -402,10 +402,10 @@ func (mr *MockTxStoreMockRecorder) GetRequest(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // GetRequests mocks base method.
-func (m *MockTxStore) GetRequests(arg0 context.Context, arg1 db.GetRequestsParams) ([]db.Request, error) {
+func (m *MockTxStore) GetRequests(arg0 context.Context, arg1 db.GetRequestsParams) ([]db.GetRequestsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequests", arg0, arg1)
-	ret0, _ := ret[0].([]db.Request)
+	ret0, _ := ret[0].([]db.GetRequestsRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -417,10 +417,10 @@ func (mr *MockTxStoreMockRecorder) GetRequests(arg0, arg1 interface{}) *gomock.C
 }
 
 // GetRequestsToApprove mocks base method.
-func (m *MockTxStore) GetRequestsToApprove(arg0 context.Context, arg1 db.GetRequestsToApproveParams) ([]db.Request, error) {
+func (m *MockTxStore) GetRequestsToApprove(arg0 context.Context, arg1 db.GetRequestsToApproveParams) ([]db.GetRequestsToApproveRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestsToApprove", arg0, arg1)
-	ret0, _ := ret[0].([]db.Request)
+	ret0, _ := ret[0].([]db.GetRequestsToApproveRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

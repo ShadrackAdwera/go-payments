@@ -12,15 +12,17 @@ WHERE id = $1 LIMIT 1;
 
 -- name: GetRequests :many
 SELECT * FROM requests 
-ORDER BY id
+JOIN clients ON requests.paid_to_id = clients.id
+ORDER BY requests.id
 LIMIT $1
 OFFSET $2;
 
 -- name: GetRequestsToApprove :many
-SELECT * FROM requests 
+SELECT * FROM requests
+JOIN clients ON requests.paid_to_id = clients.id 
 WHERE status = $1
 AND approvedby_id = $2
-ORDER BY created_at DESC;
+ORDER BY requests.created_at DESC;
 
 -- name: UpdateRequest :one
 UPDATE requests 

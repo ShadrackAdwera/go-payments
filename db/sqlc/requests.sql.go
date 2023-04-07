@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createRequest = `-- name: CreateRequest :one
@@ -86,8 +87,9 @@ func (q *Queries) GetRequest(ctx context.Context, id int64) (Request, error) {
 }
 
 const getRequests = `-- name: GetRequests :many
-SELECT id, title, status, amount, paid_to_id, createdby_id, approvedby_id, created_at, approved_at FROM requests 
-ORDER BY id
+SELECT requests.id, title, status, amount, paid_to_id, requests.createdby_id, approvedby_id, created_at, approved_at, clients.id, name, email, phone, account_number, preferred_payment_type, clients.createdby_id FROM requests 
+JOIN clients ON requests.paid_to_id = clients.id
+ORDER BY requests.id
 LIMIT $1
 OFFSET $2
 `
@@ -97,15 +99,34 @@ type GetRequestsParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetRequests(ctx context.Context, arg GetRequestsParams) ([]Request, error) {
+type GetRequestsRow struct {
+	ID                   int64          `json:"id"`
+	Title                string         `json:"title"`
+	Status               ApprovalStatus `json:"status"`
+	Amount               int64          `json:"amount"`
+	PaidToID             int64          `json:"paid_to_id"`
+	CreatedbyID          string         `json:"createdby_id"`
+	ApprovedbyID         string         `json:"approvedby_id"`
+	CreatedAt            time.Time      `json:"created_at"`
+	ApprovedAt           time.Time      `json:"approved_at"`
+	ID_2                 int64          `json:"id_2"`
+	Name                 string         `json:"name"`
+	Email                string         `json:"email"`
+	Phone                string         `json:"phone"`
+	AccountNumber        sql.NullString `json:"account_number"`
+	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	CreatedbyID_2        string         `json:"createdby_id_2"`
+}
+
+func (q *Queries) GetRequests(ctx context.Context, arg GetRequestsParams) ([]GetRequestsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getRequests, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Request
+	var items []GetRequestsRow
 	for rows.Next() {
-		var i Request
+		var i GetRequestsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -116,6 +137,13 @@ func (q *Queries) GetRequests(ctx context.Context, arg GetRequestsParams) ([]Req
 			&i.ApprovedbyID,
 			&i.CreatedAt,
 			&i.ApprovedAt,
+			&i.ID_2,
+			&i.Name,
+			&i.Email,
+			&i.Phone,
+			&i.AccountNumber,
+			&i.PreferredPaymentType,
+			&i.CreatedbyID_2,
 		); err != nil {
 			return nil, err
 		}
@@ -131,10 +159,11 @@ func (q *Queries) GetRequests(ctx context.Context, arg GetRequestsParams) ([]Req
 }
 
 const getRequestsToApprove = `-- name: GetRequestsToApprove :many
-SELECT id, title, status, amount, paid_to_id, createdby_id, approvedby_id, created_at, approved_at FROM requests 
+SELECT requests.id, title, status, amount, paid_to_id, requests.createdby_id, approvedby_id, created_at, approved_at, clients.id, name, email, phone, account_number, preferred_payment_type, clients.createdby_id FROM requests
+JOIN clients ON requests.paid_to_id = clients.id 
 WHERE status = $1
 AND approvedby_id = $2
-ORDER BY created_at DESC
+ORDER BY requests.created_at DESC
 `
 
 type GetRequestsToApproveParams struct {
@@ -142,15 +171,34 @@ type GetRequestsToApproveParams struct {
 	ApprovedbyID string         `json:"approvedby_id"`
 }
 
-func (q *Queries) GetRequestsToApprove(ctx context.Context, arg GetRequestsToApproveParams) ([]Request, error) {
+type GetRequestsToApproveRow struct {
+	ID                   int64          `json:"id"`
+	Title                string         `json:"title"`
+	Status               ApprovalStatus `json:"status"`
+	Amount               int64          `json:"amount"`
+	PaidToID             int64          `json:"paid_to_id"`
+	CreatedbyID          string         `json:"createdby_id"`
+	ApprovedbyID         string         `json:"approvedby_id"`
+	CreatedAt            time.Time      `json:"created_at"`
+	ApprovedAt           time.Time      `json:"approved_at"`
+	ID_2                 int64          `json:"id_2"`
+	Name                 string         `json:"name"`
+	Email                string         `json:"email"`
+	Phone                string         `json:"phone"`
+	AccountNumber        sql.NullString `json:"account_number"`
+	PreferredPaymentType PaymentTypes   `json:"preferred_payment_type"`
+	CreatedbyID_2        string         `json:"createdby_id_2"`
+}
+
+func (q *Queries) GetRequestsToApprove(ctx context.Context, arg GetRequestsToApproveParams) ([]GetRequestsToApproveRow, error) {
 	rows, err := q.db.QueryContext(ctx, getRequestsToApprove, arg.Status, arg.ApprovedbyID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Request
+	var items []GetRequestsToApproveRow
 	for rows.Next() {
-		var i Request
+		var i GetRequestsToApproveRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -161,6 +209,13 @@ func (q *Queries) GetRequestsToApprove(ctx context.Context, arg GetRequestsToApp
 			&i.ApprovedbyID,
 			&i.CreatedAt,
 			&i.ApprovedAt,
+			&i.ID_2,
+			&i.Name,
+			&i.Email,
+			&i.Phone,
+			&i.AccountNumber,
+			&i.PreferredPaymentType,
+			&i.CreatedbyID_2,
 		); err != nil {
 			return nil, err
 		}
