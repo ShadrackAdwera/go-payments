@@ -31,7 +31,7 @@ func (s *Server) getUserPayments(ctx *gin.Context) {
 
 	var getUserPaymentArgs GetUserPaymentsArgs
 
-	if err := ctx.ShouldBindUri(&getUserPaymentArgs); err != nil {
+	if err := ctx.ShouldBindQuery(&getUserPaymentArgs); err != nil {
 		ctx.JSON(http.StatusBadRequest, errJSON(err))
 		return
 	}
