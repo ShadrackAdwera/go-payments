@@ -226,3 +226,38 @@ func (srv *Server) getUsers(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"data": users})
 }
+
+type UserPermissionsArgs struct {
+	UserId string `uri:"id" binding:"required,min=5"`
+}
+
+func (srv *Server) getPermissionsByUserId(ctx *gin.Context) {
+
+	p := getProfileData(ctx)
+	if p.Sub == "" {
+		ctx.JSON(http.StatusUnauthorized, errJSON(fmt.Errorf("the request is not authenticated")))
+		return
+	}
+
+	_, err := srv.IsAuthorized(ctx, p.Sub, utils.PermissionsRead)
+
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errJSON(err))
+		return
+	}
+
+	var userPermissionArgs UserPermissionsArgs
+
+	if err := ctx.ShouldBindUri(&userPermissionArgs); err != nil {
+		ctx.JSON(http.StatusBadRequest, errJSON(err))
+		return
+	}
+	fmt.Println(userPermissionArgs.UserId)
+	permissions, err := srv.store.GetPermissionsByUserId(ctx, userPermissionArgs.UserId)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errJSON(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": permissions})
+}

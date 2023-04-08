@@ -386,6 +386,21 @@ func (mr *MockTxStoreMockRecorder) GetPermissions(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPermissions", reflect.TypeOf((*MockTxStore)(nil).GetPermissions), arg0, arg1)
 }
 
+// GetPermissionsByUserId mocks base method.
+func (m *MockTxStore) GetPermissionsByUserId(arg0 context.Context, arg1 string) ([]db.GetPermissionsByUserIdRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPermissionsByUserId", arg0, arg1)
+	ret0, _ := ret[0].([]db.GetPermissionsByUserIdRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPermissionsByUserId indicates an expected call of GetPermissionsByUserId.
+func (mr *MockTxStoreMockRecorder) GetPermissionsByUserId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPermissionsByUserId", reflect.TypeOf((*MockTxStore)(nil).GetPermissionsByUserId), arg0, arg1)
+}
+
 // GetRequest mocks base method.
 func (m *MockTxStore) GetRequest(arg0 context.Context, arg1 int64) (db.Request, error) {
 	m.ctrl.T.Helper()

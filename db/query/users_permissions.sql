@@ -15,6 +15,13 @@ INSERT INTO users_permissions
 (user_id, permission_id, createdby_id) 
 VALUES (UNNEST(@user_id::varchar[]), UNNEST(@permission_id::BIGINT[]),UNNEST(@createdby_id::varchar[]));
 
+-- name: GetPermissionsByUserId :many
+SELECT * 
+FROM users_permissions
+JOIN users ON users_permissions.user_id = users.id
+JOIN permissions ON users_permissions.permission_id = permissions.id
+WHERE user_id = $1;
+
 -- name: GetUserPermissionByUserIdAndPermissionId :one
 SELECT * 
 FROM users_permissions

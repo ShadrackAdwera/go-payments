@@ -56,6 +56,7 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	router.POST("/api/users", IsAuthenticated, server.createUser)
 	router.GET("/api/users/:id", IsAuthenticated, server.getUserById)
 	router.GET("/api/users", IsAuthenticated, server.getUsers)
+	router.GET("/api/users/:id/permissions", IsAuthenticated, server.getPermissionsByUserId)
 	// router.PATCH("/api/users")
 	// router.DELETE("/api/users/:id")
 
@@ -96,3 +97,7 @@ func errJSON(err error) gin.H {
 func (s *Server) StartServer(addr string) error {
 	return s.router.Run(addr)
 }
+
+/*
+SELECT * FROM users_permissions JOIN users ON users_permissions.user_id = users.id JOIN permissions ON users_permissions.permission_id = permissions.id WHERE user_id = auth0|64186f3b8cca2db234b4f009
+*/

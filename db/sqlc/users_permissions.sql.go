@@ -67,6 +67,61 @@ func (q *Queries) DeleteUserPermission(ctx context.Context, id int64) error {
 	return err
 }
 
+const getPermissionsByUserId = `-- name: GetPermissionsByUserId :many
+SELECT users_permissions.id, user_id, permission_id, users_permissions.createdby_id, users.id, username, permissions.id, name, description, permissions.createdby_id 
+FROM users_permissions
+JOIN users ON users_permissions.user_id = users.id
+JOIN permissions ON users_permissions.permission_id = permissions.id
+WHERE user_id = $1
+`
+
+type GetPermissionsByUserIdRow struct {
+	ID            int64  `json:"id"`
+	UserID        string `json:"user_id"`
+	PermissionID  int64  `json:"permission_id"`
+	CreatedbyID   string `json:"createdby_id"`
+	ID_2          string `json:"id_2"`
+	Username      string `json:"username"`
+	ID_3          int64  `json:"id_3"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	CreatedbyID_2 string `json:"createdby_id_2"`
+}
+
+func (q *Queries) GetPermissionsByUserId(ctx context.Context, userID string) ([]GetPermissionsByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPermissionsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPermissionsByUserIdRow
+	for rows.Next() {
+		var i GetPermissionsByUserIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.PermissionID,
+			&i.CreatedbyID,
+			&i.ID_2,
+			&i.Username,
+			&i.ID_3,
+			&i.Name,
+			&i.Description,
+			&i.CreatedbyID_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserPermission = `-- name: GetUserPermission :one
 SELECT id, user_id, permission_id, createdby_id FROM users_permissions
 WHERE id = $1 LIMIT 1

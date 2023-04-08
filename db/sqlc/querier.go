@@ -31,6 +31,7 @@ type Querier interface {
 	GetPermission(ctx context.Context, id int64) (Permission, error)
 	GetPermissionByName(ctx context.Context, name string) (Permission, error)
 	GetPermissions(ctx context.Context, arg GetPermissionsParams) ([]Permission, error)
+	GetPermissionsByUserId(ctx context.Context, userID string) ([]GetPermissionsByUserIdRow, error)
 	GetRequest(ctx context.Context, id int64) (Request, error)
 	GetRequests(ctx context.Context, arg GetRequestsParams) ([]GetRequestsRow, error)
 	GetRequestsToApprove(ctx context.Context, arg GetRequestsToApproveParams) ([]GetRequestsToApproveRow, error)

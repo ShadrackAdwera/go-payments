@@ -77,6 +77,14 @@ func TestGetUsersPermissions(t *testing.T) {
 	require.Len(t, userPerms, n)
 }
 
+func TestPermissionsByUserId(t *testing.T) {
+	upm := CreateRandomUserPermission(t)
+
+	userPerms, err := testQuery.GetPermissionsByUserId(context.Background(), upm.UserID)
+	require.NoError(t, err)
+	require.NotEmpty(t, userPerms)
+}
+
 func TestCreateUserPermissions(t *testing.T) {
 	user := CreateRandomUser(t)
 	creator := CreateRandomUser(t)
