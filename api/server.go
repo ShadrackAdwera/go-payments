@@ -70,7 +70,7 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	router.GET("/api/permissions", IsAuthenticated, server.getPermissions)
 	router.GET("/api/permissions/:id", IsAuthenticated, server.getPermissionById)
 	router.POST("/api/permissions", IsAuthenticated, server.createPermission)
-	router.POST("/api/user-permissions", IsAuthenticated, server.addPermissionsToUser)
+	router.POST("/api/user_permissions", IsAuthenticated, server.addPermissionsToUser)
 
 	// users permission routes
 	// TODO: Add authentication later on
@@ -83,7 +83,9 @@ func NewServer(store db.TxStore, auth *authenticator.Authenticator, distro worke
 	router.GET("/api/requests", IsAuthenticated, server.getRequests)                   // /api/requests?page_id=1&page_size=10 ||
 	router.GET("/api/requests/approval", IsAuthenticated, server.getRequestsToApprove) // /api/requests/approval?approver_id=1&status="pending"
 	router.PATCH("/api/requests/:id/approve", IsAuthenticated, server.approveRequest)
-	// NEXT - Approve request
+
+	// user payments
+	router.GET("/api/user_payments", IsAuthenticated, server.getUserPayments)
 
 	server.router = router
 	server.auth = auth
