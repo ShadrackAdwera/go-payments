@@ -7,14 +7,14 @@ INSERT INTO user_payments (
 RETURNING *;
 
 -- name: GetUserPayment :one
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT *
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
 WHERE user_payments.id = $1 LIMIT 1;
 
 -- name: GetUserPayments :many
-SELECT user_payments.id, user_payments.client_id, user_payments.request_id, user_payments.status, clients.name, clients.preferred_payment_type, requests.title, requests.amount, requests.status 
+SELECT *
 FROM user_payments
 JOIN clients ON user_payments.client_id = clients.id
 JOIN requests ON user_payments.request_id = requests.id
