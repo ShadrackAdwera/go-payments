@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -34,8 +33,6 @@ func (s *Server) home(ctx *gin.Context) {
 	}
 
 	mapstructure.Decode(profile, &profileData)
-
-	fmt.Println(profileData)
 
 	ctx.JSON(http.StatusAccepted, gin.H{"user": profileData})
 }
