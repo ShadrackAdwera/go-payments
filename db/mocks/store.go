@@ -183,6 +183,21 @@ func (mr *MockTxStoreMockRecorder) CreateUserPermissions(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserPermissions", reflect.TypeOf((*MockTxStore)(nil).CreateUserPermissions), arg0, arg1)
 }
 
+// CreateUserTx mocks base method.
+func (m *MockTxStore) CreateUserTx(arg0 context.Context, arg1 db.CreateUserTxArgs) (db.CreateUserTxResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserTx", arg0, arg1)
+	ret0, _ := ret[0].(db.CreateUserTxResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateUserTx indicates an expected call of CreateUserTx.
+func (mr *MockTxStoreMockRecorder) CreateUserTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserTx", reflect.TypeOf((*MockTxStore)(nil).CreateUserTx), arg0, arg1)
+}
+
 // DarajaTokenTx mocks base method.
 func (m *MockTxStore) DarajaTokenTx(arg0 context.Context) (db.DarajaTxResponse, error) {
 	m.ctrl.T.Helper()
