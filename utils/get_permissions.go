@@ -42,6 +42,10 @@ func GetPermissionData() []PermissionData {
 			PermissionName:        RequestsApprove,
 			PermissionDescription: "This permission allows approving requests in the system",
 		},
+		{
+			PermissionName:        UserPaymentsRead,
+			PermissionDescription: "This permission allows reading user payments in the system",
+		},
 	}
 
 	return p

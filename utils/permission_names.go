@@ -11,6 +11,7 @@ const (
 	RequestsCreate    = "requests:create"
 	RequestsRead      = "requests:read"
 	RequestsApprove   = "requests:approve"
+	UserPaymentsRead  = "user:payments:read"
 )
 
 type PermissionData struct {
