@@ -44,6 +44,14 @@ func getProfileData(ctx *gin.Context) Profile {
 }
 
 type CreateUserArgs struct {
+	Username      string  `json:"username" binding:"required,min=3"`
+	Email         string  `json:"email" binding:"required,email"`
+	Password      string  `json:"password" binding:"required,min=6"`
+	Connection    string  `json:"connection" binding:"required"`
+	PermissionIds []int64 `json:"permission_ids" binding:"required"`
+}
+
+type Auth0UserArgs struct {
 	Username   string `json:"username" binding:"required,min=3"`
 	Email      string `json:"email" binding:"required,email"`
 	Password   string `json:"password" binding:"required,min=6"`
@@ -104,8 +112,14 @@ func (s *Server) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errJSON(fmt.Errorf("error decoding json")))
 		return
 	}
+	auth0userArgs := Auth0UserArgs{
+		Username:   createUserArgs.Username,
+		Email:      createUserArgs.Email,
+		Password:   createUserArgs.Password,
+		Connection: createUserArgs.Connection,
+	}
 
-	jsonPayload, err := json.Marshal(createUserArgs)
+	jsonPayload, err := json.Marshal(auth0userArgs)
 
 	if err != nil {
 		fmt.Println(err)
@@ -140,13 +154,50 @@ func (s *Server) createUser(ctx *gin.Context) {
 	err = json.NewDecoder(res.Body).Decode(&userRes)
 
 	if err != nil {
+		// delete user here
 		ctx.JSON(http.StatusInternalServerError, errJSON(fmt.Errorf("error decoding json into user res")))
 		return
 	}
 
-	user, err := s.store.CreateUser(ctx, db.CreateUserParams{
-		ID:       userRes.UserID,
-		Username: userRes.Username,
+	// create user permissions
+	userIds := []string{}
+	uCreatedByIds := []string{}
+
+	for i := 0; i < len(createUserArgs.PermissionIds); i++ {
+		userIds = append(userIds, userRes.UserID)
+		uCreatedByIds = append(uCreatedByIds, p.Sub)
+	}
+
+	resp, err := s.store.CreateUserTx(ctx, db.CreateUserTxArgs{
+		Username:      userRes.Username,
+		UserId:        userRes.UserID,
+		PermissionIds: createUserArgs.PermissionIds,
+		UserIds:       userIds,
+		CreatedByIds:  uCreatedByIds,
+		AfterCreate: func(err error) error {
+			if err != nil {
+				// delete user from Auth0
+				deleteUserUrl := "https://" + os.Getenv("AUTH0_DOMAIN") + "/api/v2/users/" + userRes.UserID
+				req, err = http.NewRequest(http.MethodDelete, deleteUserUrl, nil)
+
+				if err != nil {
+					return err
+				}
+
+				req.Header.Add("authorization", fmt.Sprintf("Bearer %s", authReq.AccessToken))
+				req.Header.Add("content-type", "application/json")
+
+				res, err = http.DefaultClient.Do(req)
+
+				if err != nil {
+					return err
+				}
+
+				defer res.Body.Close()
+				return nil
+			}
+			return nil
+		},
 	})
 
 	if err != nil {
@@ -154,7 +205,7 @@ func (s *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "user created", "user": user})
+	ctx.JSON(http.StatusCreated, gin.H{"message": resp.Message})
 
 }
 
