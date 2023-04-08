@@ -9,6 +9,7 @@ type TxStore interface {
 	Querier
 	ApproveRequestTx(ctx context.Context, args ApproveRequestTxRequest) (ApproveRequestTxResponse, error)
 	DarajaTokenTx(ctx context.Context) (DarajaTxResponse, error)
+	CreateUserTx(ctx context.Context, args CreateUserTxArgs) (CreateUserTxResponse, error)
 }
 
 type Store struct {
