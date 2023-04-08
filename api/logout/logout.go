@@ -1,7 +1,6 @@
 package logout
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,7 +29,6 @@ func Handler(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	fmt.Println(ctx.Request.Host)
 	parameters := url.Values{}
 	parameters.Add("returnTo", returnTo.String())
 	parameters.Add("client_id", os.Getenv("AUTH0_CLIENT_ID"))
